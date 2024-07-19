@@ -1,0 +1,34 @@
+{
+  "name": "timetable-maker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "tauri": "tauri",
+    "start": "next start",
+    "lint": "next lint",
+    "start_pb": "cd data/pb && pocketbase serve"
+  },
+  "dependencies": {
+    "@ant-design/cssinjs": "1.21.0",
+    "@ant-design/icons": "5.3.7",
+    "@emotion/styled": "11.11.5",
+    "@react-pdf/renderer": "3.4.4",
+    "antd": "5.18.3",
+    "install": "0.13.0",
+    "luxon": "3.4.4",
+    "next": "14.2.4",
+    "npm": "10.8.1",
+    "pocketbase": "0.21.3",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-to-print": "2.15.1",
+    "swr": "2.2.5"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.6.0",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.4"
+  }
+}
