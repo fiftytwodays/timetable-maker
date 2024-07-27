@@ -1,11 +1,15 @@
 import useSWR from "swr";
+import { useState } from "react";
 
 import { EntityList } from "@/shared/ui";
 import { columns } from "../config/columns";
 import { getAllPeriods } from "../api/get-periods";
 
 function PeriodsList({ reloadData, pageNo, setPageNo, pageSize, setPageSize }) {
-  const { data, isLoading } = useSWR(["/api/periods"], getAllPeriods);
+  const [sort, setSort] = useState("");
+  const { data, isLoading } = useSWR([sort, "/api/periods"], () =>
+    getAllPeriods(sort)
+  );
 
   return (
     <div>
@@ -20,6 +24,7 @@ function PeriodsList({ reloadData, pageNo, setPageNo, pageSize, setPageSize }) {
         setPageNo={setPageNo}
         pageSize={pageSize}
         setPageSize={setPageSize}
+        setSort={setSort}
         showTableResizeOption
         isPaginationVisible={true}
       />

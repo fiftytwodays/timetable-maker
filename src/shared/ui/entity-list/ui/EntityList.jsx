@@ -25,12 +25,15 @@ export default function EntityList({
   const visibleColumns = columns.filter((column) => !column.hidden);
 
   const setSortValue = (sorter) => {
-    const sortOrder = sorter.order === "ascend" ? "asc" : "desc";
     const sortField = Array.isArray(sorter.field)
       ? sorter.field.join(".")
       : sorter.field;
 
-    const sortValue = sorter.order ? `${sortField},${sortOrder}` : undefined;
+    const sortValue = sorter.order
+      ? sorter.order === "descend"
+        ? `-${sortField}`
+        : sortField
+      : undefined;
 
     setSort(sortValue);
   };
