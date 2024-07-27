@@ -6,25 +6,37 @@ import { useRouter } from "next/router";
 const { Header, Content, Footer } = Layout;
 
 const items = [
-  { key: "teachers", label: <Link href="/teachers">Teachers</Link> },
-  { key: "subjects", label: <Link href="/subjects">Subjects</Link> },
-  { key: "classes", label: <Link href="/classes">Classes</Link> },
-  { key: "periods", label: <Link href="/periods">Periods</Link> },
-  { key: "csta", label: <Link href="/csta">CSTA</Link> },
-  { key: "cta", label: <Link href="/cta">CTA</Link> },
-  {
-    key: "class-timetable",
-    label: <Link href="/class-timetable">Class timetable</Link>,
+  { key: "entities", label: "Entities",
+    children: [
+      { key: "teachers", label: <Link href="/teachers">Teachers</Link> },
+      { key: "subjects", label: <Link href="/subjects">Subjects</Link> },
+      { key: "classes", label: <Link href="/classes">Classes</Link> },
+      { key: "periods", label: <Link href="/periods">Periods</Link> }
+    ]
   },
-  {
-    key: "students-timetable",
-    label: <Link href="/students-timetable">Students timetable</Link>,
+  { key: "associations", label: "Associations",
+    children: [      
+      { key: "csta", label: <Link href="/csta">Class-Student-Teacher association</Link> },
+      { key: "cta", label: <Link href="/cta">Class-Timetable association</Link> }
+    ]
   },
-  {
-    key: "teachers-timetable",
-    label: <Link href="/teachers-timetable">Teachers timetable</Link>,
-  },
-  { key: "report", label: "Report", disabled: true },
+  { key: "create-timetable", label: <Link href="/create-timetable">Create timetable</Link> },
+  { key: "timetables", label: "Timetables",
+    children: [      
+      {
+        key: "class-timetable",
+        label: <Link href="/class-timetable">Class timetable</Link>,
+      },
+      {
+        key: "students-timetable",
+        label: <Link href="/students-timetable">Students timetable</Link>,
+      },
+      {
+        key: "teachers-timetable",
+        label: <Link href="/teachers-timetable">Teachers timetable</Link>,
+      }
+    ]
+  }
 ];
 
 const AppLayout = ({ children }) => {
