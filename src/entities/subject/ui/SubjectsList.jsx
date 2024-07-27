@@ -12,7 +12,7 @@ function SubjectsList({
   pageSize,
   setPageSize,
 }) {
-  const [sort, setSort] = useState("");
+  const [sort, setSort] = useState();
   const { data, isLoading } = useSWR([sort, "/api/subjects"], () =>
     getAllSubjects(sort)
   );
