@@ -1,5 +1,12 @@
-export default function Home() {
-  return <>Home page</>;
-}
-{
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+
+export default function Index() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace('/class-timetable');
+  }, []);
+
+  return null;
 }
