@@ -6,7 +6,7 @@ import { columns } from "../config/columns";
 import { getAllPeriods } from "../api/get-periods";
 
 function PeriodsList({ reloadData, pageNo, setPageNo, pageSize, setPageSize }) {
-  const [sort, setSort] = useState("");
+  const [sort, setSort] = useState();
   const { data, isLoading } = useSWR([sort, "/api/periods"], () =>
     getAllPeriods(sort)
   );
