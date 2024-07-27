@@ -1,4 +1,5 @@
 import useSWR from "swr";
+import { useState } from "react";
 
 import { EntityList } from "@/shared/ui";
 import { columns } from "../config/columns";
@@ -11,7 +12,10 @@ function SubjectsList({
   pageSize,
   setPageSize,
 }) {
-  const { data, isLoading } = useSWR(["/api/subjects"], getAllSubjects);
+  const [sort, setSort] = useState("");
+  const { data, isLoading } = useSWR([sort, "/api/subjects"], () =>
+    getAllSubjects(sort)
+  );
 
   return (
     <div>
@@ -26,6 +30,7 @@ function SubjectsList({
         setPageNo={setPageNo}
         pageSize={pageSize}
         setPageSize={setPageSize}
+        setSort={setSort}
         showTableResizeOption
         isPaginationVisible={true}
       />
