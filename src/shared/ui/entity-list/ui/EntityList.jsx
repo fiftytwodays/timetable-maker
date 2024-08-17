@@ -21,8 +21,10 @@ export default function EntityList({
   isBordered = false,
   isLoading = false,
   title,
+  isEditable = false,
+  components = false,
 }) {
-  const visibleColumns = columns.filter((column) => !column.hidden);
+  const visibleColumns = columns.filter((column) => !column?.hidden);
 
   const setSortValue = (sorter) => {
     const sortField = Array.isArray(sorter.field)
@@ -85,6 +87,7 @@ export default function EntityList({
           scroll={{
             x: 1,
           }}
+          components={isEditable && components}
         ></Table>
       </div>
     </>

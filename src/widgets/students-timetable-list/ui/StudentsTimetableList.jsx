@@ -21,7 +21,7 @@ function StudentsTimetableList() {
 
   const { data: periods, isLoading: isPeriodsLoading } = useSWR(
     ["/api/periods"],
-    getAllPeriods
+    () => getAllPeriods()
   );
 
   let AllTimetables = [];
