@@ -6,8 +6,9 @@ import useSWR from "swr";
 import { ClassTimetableList as _ClassTimetableList } from "@/entities/class-timetable";
 import { useClasses, SelectClass } from "@/features/change-class";
 import { getAllPeriods } from "@/entities/periods/api/get-periods";
+import { getAllDays } from "@/entities/days/api/get-days";
 
-function ClassTimetableList() {
+function EditableTimetableList() {
   const [pageNo, setPageNo] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
@@ -24,6 +25,11 @@ function ClassTimetableList() {
     () => getAllPeriods()
   );
 
+  const { data: days, isLoading: isDaysLoading } = useSWR(
+    ["/api/days"],
+    getAllDays
+  );
+
   let AllTimetables = [];
 
   if (selectedClass === "all") {
@@ -38,6 +44,8 @@ function ClassTimetableList() {
             isLoading={false}
             selectedClass={item?.value}
             periods={periods}
+            days={days}
+            isEditable={true}
           />
           {index < classList.length - 1 && <div className="page-break" />}
         </div>
@@ -66,9 +74,11 @@ function ClassTimetableList() {
               setPageNo={setPageNo}
               pageSize={pageSize}
               setPageSize={setPageSize}
-              isLoading={isPeriodsLoading}
+              isLoading={isPeriodsLoading || isDaysLoading}
               selectedClass={selectedClass}
               periods={periods}
+              days={days}
+              isEditable={true}
             />
           )}
         </div>
@@ -77,4 +87,4 @@ function ClassTimetableList() {
   );
 }
 
-export default ClassTimetableList;
+export default EditableTimetableList;

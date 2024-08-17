@@ -24,7 +24,7 @@ export const generateTimetable = (apiResponse) => {
       data[dayName] = { day: dayName };
     }
 
-    data[dayName][periodName] = [classInfo, teacherName];
+    data[dayName][periodName] = [classInfo, teacherName, item?.id];
   });
 
   const tableData = Object.values(data);
