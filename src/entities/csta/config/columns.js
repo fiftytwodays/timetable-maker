@@ -15,14 +15,14 @@ export const columns = [
     sorter: true,
   },
   {
-    title: "Class Name",
+    title: "Class name",
     dataIndex: ["expand", "class_name", "name"],
     width: 300,
     hidden: false,
     sorter: true,
   },
   {
-    title: "Teacher Name",
+    title: "Teacher name",
     dataIndex: ["expand", "teacher_name", "name"],
 
     width: 300,
@@ -30,7 +30,7 @@ export const columns = [
     sorter: true,
   },
   {
-    title: "Subject Name",
+    title: "Subject name",
     dataIndex: ["expand", "subject_name", "name"],
     width: 300,
     hidden: false,
