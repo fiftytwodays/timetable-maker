@@ -38,7 +38,13 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [],
+      "resources": [
+        "data/pb/*",
+        "start-pocketbase.bat",
+        "stop-pocketbase.bat",
+        "start-pocketbase.sh",
+        "stop-pocketbase.sh"
+      ],
       "shortDescription": "",
       "targets": "all",
       "windows": {
@@ -51,7 +57,7 @@
       }
     },
     "security": {
-      "csp": "default-src 'self'; script-src 'self'"
+      "csp": null
     },
     "updater": {
       "active": false
