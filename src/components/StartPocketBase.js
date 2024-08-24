@@ -8,6 +8,7 @@ const StartPocketBase = () => {
     // Check if running in a browser environment and PocketBase has not started yet
     if (typeof window !== 'undefined' && !isPocketBaseStarted) {
       isPocketBaseStarted = true;
+      console.log("Starting PocketBase");
       invoke('start_pocketbase')
         .then(() => {
           console.log('PocketBase started successfully');
