@@ -7,14 +7,14 @@
     "build": "next build",
     "tauri": "tauri",
     "start": "next start",
-    "lint": "next lint",
-    "start_pb": "cd data/pb && pocketbase serve"
+    "lint": "next lint"
   },
   "dependencies": {
     "@ant-design/cssinjs": "1.21.0",
     "@ant-design/icons": "5.3.7",
     "@emotion/styled": "11.11.5",
     "@react-pdf/renderer": "3.4.4",
+    "@tauri-apps/api": "^1.6.0",
     "antd": "5.18.3",
     "install": "0.13.0",
     "luxon": "3.4.4",
@@ -24,7 +24,8 @@
     "react": "^18",
     "react-dom": "^18",
     "react-to-print": "2.15.1",
-    "swr": "2.2.5"
+    "swr": "2.2.5",
+    "tauri-plugin-log-api": "github:tauri-apps/tauri-plugin-log#v1"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.6.0",
