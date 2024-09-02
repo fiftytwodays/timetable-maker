@@ -4,10 +4,10 @@ import { Flex, Typography } from "antd";
 import Image from "next/image";
 
 const getColumnTitle = (column) => {
-  if (column?.isLogoVisible) {
+  if (column?.isLogoVisible && column?.logoURL) {
     return (
       <Flex justify="center">
-        <Image src="/logo.png" alt="Logo" width={70} height={70} />
+        <Image src={column?.logoURL} alt="Logo" width={70} height={70} />
       </Flex>
     );
   } else return column?.title;

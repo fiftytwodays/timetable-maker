@@ -14,6 +14,7 @@ const items = [
       { key: "subjects", label: <Link href="/subjects">Subjects</Link> },
       { key: "classes", label: <Link href="/classes">Classes</Link> },
       { key: "periods", label: <Link href="/periods">Periods</Link> },
+      { key: "school", label: <Link href="/school">School</Link> },
     ],
   },
   {

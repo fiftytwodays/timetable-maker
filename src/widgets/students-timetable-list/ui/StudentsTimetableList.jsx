@@ -6,6 +6,8 @@ import useSWR from "swr";
 import { StudentsTimetableList as _StudentsTimetableList } from "@/entities/students-timetable";
 import { useClasses, SelectClass } from "@/features/change-class";
 import { getAllPeriods } from "@/entities/periods/api/get-periods";
+import { getSchoolInfo } from "@/entities/school/api/get-school-info";
+import { getImageUrl } from "@/entities/school/lib/get-image-url";
 
 function StudentsTimetableList() {
   const [pageNo, setPageNo] = useState(0);
@@ -24,6 +26,11 @@ function StudentsTimetableList() {
     () => getAllPeriods()
   );
 
+  const { data: schoolDetails, isLoading: isSchoolDetailLoading } = useSWR(
+    ["/api/school"],
+    getSchoolInfo
+  );
+
   let AllTimetables = [];
 
   if (selectedClass === "all") {
@@ -35,9 +42,10 @@ function StudentsTimetableList() {
       return (
         <div key={item?.value}>
           <_StudentsTimetableList
-            isLoading={false}
+            isLoading={isPeriodsLoading || isSchoolDetailLoading}
             selectedClass={item?.value}
             periods={periods}
+            logoURL={getImageUrl(schoolDetails?.[0])}
           />
           {index < classList.length - 1 && <div className="page-break" />}
         </div>
@@ -66,9 +74,10 @@ function StudentsTimetableList() {
               setPageNo={setPageNo}
               pageSize={pageSize}
               setPageSize={setPageSize}
-              isLoading={isPeriodsLoading}
+              isLoading={isPeriodsLoading || isSchoolDetailLoading}
               selectedClass={selectedClass}
               periods={periods}
+              logoURL={getImageUrl(schoolDetails?.[0])}
             />
           )}
         </div>

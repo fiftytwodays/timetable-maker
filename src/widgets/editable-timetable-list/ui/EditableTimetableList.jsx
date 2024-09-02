@@ -7,6 +7,8 @@ import { ClassTimetableList as _ClassTimetableList } from "@/entities/class-time
 import { useClasses, SelectClass } from "@/features/change-class";
 import { getAllPeriods } from "@/entities/periods/api/get-periods";
 import { getAllDays } from "@/entities/days/api/get-days";
+import { getSchoolInfo } from "@/entities/school/api/get-school-info";
+import { getImageUrl } from "@/entities/school/lib/get-image-url";
 
 function EditableTimetableList() {
   const [pageNo, setPageNo] = useState(0);
@@ -30,6 +32,11 @@ function EditableTimetableList() {
     getAllDays
   );
 
+  const { data: schoolDetails, isLoading: isSchoolDetailLoading } = useSWR(
+    ["/api/school"],
+    getSchoolInfo
+  );
+
   let AllTimetables = [];
 
   if (selectedClass === "all") {
@@ -41,11 +48,14 @@ function EditableTimetableList() {
       return (
         <div key={item?.value}>
           <_ClassTimetableList
-            isLoading={false}
+            isLoading={
+              isPeriodsLoading || isDaysLoading || isSchoolDetailLoading
+            }
             selectedClass={item?.value}
             periods={periods}
             days={days}
             isEditable={true}
+            logoURL={getImageUrl(schoolDetails?.[0])}
           />
           {index < classList.length - 1 && <div className="page-break" />}
         </div>
@@ -74,11 +84,14 @@ function EditableTimetableList() {
               setPageNo={setPageNo}
               pageSize={pageSize}
               setPageSize={setPageSize}
-              isLoading={isPeriodsLoading || isDaysLoading}
+              isLoading={
+                isPeriodsLoading || isDaysLoading || isSchoolDetailLoading
+              }
               selectedClass={selectedClass}
               periods={periods}
               days={days}
               isEditable={true}
+              logoURL={getImageUrl(schoolDetails?.[0])}
             />
           )}
         </div>

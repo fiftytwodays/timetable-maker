@@ -7,15 +7,15 @@ function getDurationByPeriodName(periods, periodName) {
   return period ? period.duration : null;
 }
 
-export function generateTimetableColumns(
+export function generateTimetableColumns({
   columns,
   periods,
   selectedClass,
   isEditable,
-  handleSave = () => {}
-) {
+  handleSave = () => {},
+  logoURL,
+}) {
   const periodNames = periods.map((period) => period?.name);
-
   return columns
     .filter(
       (column) =>
@@ -26,8 +26,8 @@ export function generateTimetableColumns(
     .map((column) => {
       const { key, title } = column;
 
-      if (key === "day" || key === "break") {
-        return column;
+      if (column?.isLogoVisible) {
+        return { ...column, logoURL: logoURL };
       }
 
       const duration = getDurationByPeriodName(periods, title);
