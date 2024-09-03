@@ -17,6 +17,7 @@ function TeachersTimetableList({
   setSort,
   selectedTeacher = "",
   periods = [],
+  logoURL = "",
 }) {
   const { Text } = Typography;
 
@@ -28,7 +29,7 @@ function TeachersTimetableList({
   return (
     <EntityList
       isLoading={isLoading}
-      columns={generateTimetableColumns(columns, periods)}
+      columns={generateTimetableColumns({ columns, periods, logoURL })}
       data={generateTimetable(data)}
       reloadData={reloadData}
       rowKey="key"

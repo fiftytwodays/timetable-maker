@@ -24,6 +24,8 @@ function ClassTimetableList({
   periods = [],
   days = [],
   isEditable = false,
+  logoURL = "",
+  isLoading,
 }) {
   const { Text } = Typography;
 
@@ -35,7 +37,7 @@ function ClassTimetableList({
     return days.find((day) => day?.name === dayName)?.id;
   };
 
-  const { data, isLoading } = useSWR(
+  const { data, isLoading: isClassTimetableLoading } = useSWR(
     ["/api/class-timetable", selectedClass],
     () => getAllClassTimetable(selectedClass)
   );
@@ -103,14 +105,15 @@ function ClassTimetableList({
 
   return (
     <EntityList
-      isLoading={isLoading}
-      columns={generateTimetableColumns(
+      isLoading={isLoading || isClassTimetableLoading}
+      columns={generateTimetableColumns({
         columns,
         periods,
         selectedClass,
         isEditable,
-        handleSave
-      )}
+        handleSave,
+        logoURL,
+      })}
       data={generateTimetable(data, days, periods)}
       reloadData={reloadData}
       rowKey="key"

@@ -10,6 +10,7 @@ import { generateTimetableColumns } from "@/shared/lib/generate-timetable-column
 
 function StudentsTimetableList({
   reloadData,
+  isLoading,
   pageNo,
   setPageNo,
   pageSize,
@@ -17,18 +18,19 @@ function StudentsTimetableList({
   setSort,
   selectedClass = "",
   periods = [],
+  logoURL = "",
 }) {
   const { Text } = Typography;
 
-  const { data, isLoading } = useSWR(
+  const { data, isStudentesTimetableLoading } = useSWR(
     ["/api/students-timetable", selectedClass],
     () => getAllStudentsTimetable(selectedClass)
   );
 
   return (
     <EntityList
-      isLoading={isLoading}
-      columns={generateTimetableColumns(columns, periods)}
+      isLoading={isLoading || isStudentesTimetableLoading}
+      columns={generateTimetableColumns({ columns, periods, logoURL })}
       data={generateTimetable(data)}
       reloadData={reloadData}
       rowKey="key"

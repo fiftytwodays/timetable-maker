@@ -6,6 +6,8 @@ import useSWR from "swr";
 import { ClassTimetableList as _ClassTimetableList } from "@/entities/class-timetable";
 import { useClasses, SelectClass } from "@/features/change-class";
 import { getAllPeriods } from "@/entities/periods/api/get-periods";
+import { getSchoolInfo } from "@/entities/school/api/get-school-info";
+import { getImageUrl } from "@/entities/school/lib/get-image-url";
 
 function ClassTimetableList() {
   const [pageNo, setPageNo] = useState(0);
@@ -24,6 +26,11 @@ function ClassTimetableList() {
     () => getAllPeriods()
   );
 
+  const { data: schoolDetails, isLoading: isSchoolDetailLoading } = useSWR(
+    ["/api/school"],
+    getSchoolInfo
+  );
+
   let AllTimetables = [];
 
   if (selectedClass === "all") {
@@ -35,9 +42,10 @@ function ClassTimetableList() {
       return (
         <div key={item?.value}>
           <_ClassTimetableList
-            isLoading={false}
+            isLoading={isPeriodsLoading || isSchoolDetailLoading}
             selectedClass={item?.value}
             periods={periods}
+            logoURL={getImageUrl(schoolDetails?.[0])}
           />
           {index < classList.length - 1 && <div className="page-break" />}
         </div>
@@ -69,6 +77,7 @@ function ClassTimetableList() {
               isLoading={isPeriodsLoading}
               selectedClass={selectedClass}
               periods={periods}
+              logoURL={getImageUrl(schoolDetails?.[0])}
             />
           )}
         </div>
