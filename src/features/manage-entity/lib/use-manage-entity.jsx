@@ -17,6 +17,13 @@ const trimValues = (values) =>
     ])
   );
 
+const requiredRuleType = (field) => {
+  if (field.mode === "multiple") {
+    return "array";
+  }
+  return field.type ? "any" : "string";
+};
+
 // Names are shown across timetables and lookups, so revalidate every list.
 const revalidateAll = () => mutate(() => true);
 
@@ -60,6 +67,9 @@ export default function useManageEntity({
         ? [
             {
               required: true,
+              // The validator assumes text unless told otherwise, which
+              // rejects boolean select values such as Enabled/Disabled.
+              type: requiredRuleType(field),
               whitespace: !field.type,
               message: `Please ${
                 field.type === "select" ? "select" : "enter"
