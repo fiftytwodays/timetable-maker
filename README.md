@@ -53,7 +53,7 @@ The first time someone signs in to a new deployment, the app creates the initial
 
 Teachers, subjects, classes and periods can be added, edited and deleted from their pages in the app. Period names must be P1 to P5, because the timetables have a column for each of those. A record that is still in use (for example, a teacher in a class–subject–teacher association, or a period in the timetable) cannot be deleted until those references are removed.
 
-Class–subject–teacher associations have no screen yet. Manage them in the **Amplify console → your app → Data → Data manager**.
+Class–subject–teacher associations and class-timetable entries can also be added, edited and deleted from their pages. Saving is refused if it would double-book a class or a teacher in the same day and period, and a class, subject and teacher can only be associated once.
 
 ## Deploying
 

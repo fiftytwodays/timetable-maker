@@ -79,7 +79,8 @@ function ClassTimetableList({
       const { isUnique, description } = await checkForCtaConflict(
         cstaId,
         dayId,
-        periodId
+        periodId,
+        ctaId
       );
       if (!isUnique) {
         showMessage("warning", description);

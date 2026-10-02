@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Input, Modal } from "antd";
+import { Form, Input, Modal, Select } from "antd";
 
 function EntityFormModal({
   open,
@@ -47,7 +47,16 @@ function EntityFormModal({
             extra={field.extra}
             rules={field.rules}
           >
-            <Input placeholder={field.placeholder} />
+            {field.type === "select" ? (
+              <Select
+                showSearch
+                optionFilterProp="label"
+                options={field.options}
+                placeholder={field.placeholder}
+              />
+            ) : (
+              <Input placeholder={field.placeholder} />
+            )}
           </Form.Item>
         ))}
       </Form>

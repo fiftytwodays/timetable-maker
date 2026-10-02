@@ -2,7 +2,7 @@ import { client, listAll, sortRecords } from "@/shared/lib/amplify";
 
 import { toCstaRecord } from "../lib/to-csta-record";
 
-const selectionSet = [
+export const cstaSelectionSet = [
   "id",
   "name",
   "classId",
@@ -20,7 +20,7 @@ const selectionSet = [
 
 export const getAllClassSubjectTeacherAssociation = async () => {
   const result = await listAll(client.models.ClassSubjectTeacherAssociation, {
-    selectionSet,
+    selectionSet: cstaSelectionSet,
   });
 
   return sortRecords(result, "created").map(toCstaRecord);

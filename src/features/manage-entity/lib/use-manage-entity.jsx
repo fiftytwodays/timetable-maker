@@ -31,6 +31,7 @@ export default function useManageEntity({
   createRecord,
   updateRecord,
   deleteRecord,
+  getRecordLabel = (record) => record.name,
 }) {
   // null: modal closed, {}: creating, record: editing
   const [editingRecord, setEditingRecord] = useState(null);
@@ -44,7 +45,9 @@ export default function useManageEntity({
             {
               required: true,
               whitespace: true,
-              message: `Please enter the ${field.label.toLowerCase()}`,
+              message: `Please ${
+                field.type === "select" ? "select" : "enter"
+              } the ${field.label.toLowerCase()}`,
             },
           ]
         : []),
@@ -97,7 +100,9 @@ export default function useManageEntity({
       message.success(`${entityName} deleted!`);
       revalidateAll();
     } catch (error) {
-      message.error(`Could not delete "${record.name}". ${error.message}`);
+      message.error(
+        `Could not delete "${getRecordLabel(record)}". ${error.message}`
+      );
     }
   };
 
@@ -126,7 +131,7 @@ export default function useManageEntity({
         </Button>
         <Popconfirm
           title={`Delete ${label}`}
-          description={`Delete "${record.name}"?`}
+          description={`Delete "${getRecordLabel(record)}"?`}
           okText="Delete"
           okButtonProps={{ danger: true }}
           onConfirm={() => onDelete(record)}
