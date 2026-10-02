@@ -1,5 +1,5 @@
 import { randomInt } from "node:crypto";
-import type { AppSyncIdentityCognito, AppSyncResolverEvent } from "aws-lambda";
+import type { AppSyncIdentityCognito } from "aws-lambda";
 import {
   AdminAddUserToGroupCommand,
   AdminCreateUserCommand,
@@ -40,6 +40,15 @@ type Arguments = {
   name?: string | null;
   role?: string;
   enabled?: boolean | null;
+};
+
+// The payload Amplify's function resolver sends: the operation name is at
+// the top level, not under `info` as in a plain AppSync Lambda resolver.
+type ResolverEvent = {
+  typeName: string;
+  fieldName: string;
+  arguments: Arguments;
+  identity: AppSyncIdentityCognito | null;
 };
 
 const client = new CognitoIdentityProviderClient();
@@ -276,15 +285,15 @@ const resetUserPassword = async ({ id }: Arguments) => {
 };
 
 // Stops an admin from locking themselves out.
-const assertNotSelf = (event: AppSyncResolverEvent<Arguments>) => {
-  const identity = event.identity as AppSyncIdentityCognito | null;
+const assertNotSelf = (event: ResolverEvent) => {
+  const { identity } = event;
   const { id, role, enabled } = event.arguments;
   const isSelf =
     id !== undefined && (id === identity?.username || id === identity?.sub);
   if (!isSelf) {
     return;
   }
-  if (event.info.fieldName === "deleteUser") {
+  if (event.fieldName === "deleteUser") {
     throw new Error("You cannot delete your own account.");
   }
   if (enabled === false) {
@@ -303,10 +312,10 @@ const operations: Record<string, (args: Arguments) => Promise<unknown>> = {
   resetUserPassword,
 };
 
-export const handler = async (event: AppSyncResolverEvent<Arguments>) => {
-  const operation = operations[event.info.fieldName];
+export const handler = async (event: ResolverEvent) => {
+  const operation = operations[event.fieldName];
   if (!operation) {
-    throw new Error(`Unknown operation ${event.info.fieldName}`);
+    throw new Error(`Unknown operation ${event.fieldName}`);
   }
   assertNotSelf(event);
   return operation(event.arguments);
