@@ -25,9 +25,9 @@ const schema = a
 
     Teacher: a.model({
       name: a.string(),
-      // Login linked to this teacher: the Cognito user's sub and email.
+      // Login linked to this teacher: the Cognito user's sub and username.
       userId: a.string(),
-      email: a.string(),
+      username: a.string(),
       associations: a.hasMany("ClassSubjectTeacherAssociation", "teacherId"),
       checklistAssignments: a.hasMany("ChecklistAssignment", "teacherId"),
     }),
@@ -99,6 +99,7 @@ const schema = a
       teacher: a.belongsTo("Teacher", "teacherId"),
     }),
 
+    // A Cognito user; `id` is the username.
     User: a.customType({
       id: a.string().required(),
       sub: a.string(),
@@ -108,6 +109,8 @@ const schema = a
       enabled: a.boolean(),
       status: a.string(),
       createdAt: a.string(),
+      // Only set when a user is created, so the admin can hand it over.
+      temporaryPassword: a.string(),
     }),
 
     listUsers: a
@@ -119,7 +122,8 @@ const schema = a
     createUser: a
       .mutation()
       .arguments({
-        email: a.string().required(),
+        username: a.string().required(),
+        email: a.string(),
         name: a.string(),
         role: a.string().required(),
       })
@@ -131,6 +135,7 @@ const schema = a
       .mutation()
       .arguments({
         id: a.string().required(),
+        email: a.string(),
         name: a.string(),
         role: a.string(),
         enabled: a.boolean(),
@@ -146,10 +151,11 @@ const schema = a
       .authorization((allow) => [allow.group("ADMIN")])
       .handler(a.handler.function(manageUsers)),
 
+    // Returns the new temporary password.
     resetUserPassword: a
       .mutation()
       .arguments({ id: a.string().required() })
-      .returns(a.boolean())
+      .returns(a.string())
       .authorization((allow) => [allow.group("ADMIN")])
       .handler(a.handler.function(manageUsers)),
   })

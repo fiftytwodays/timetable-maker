@@ -1,13 +1,15 @@
+import { randomInt } from "node:crypto";
 import type { AppSyncIdentityCognito, AppSyncResolverEvent } from "aws-lambda";
 import {
   AdminAddUserToGroupCommand,
   AdminCreateUserCommand,
+  AdminDeleteUserAttributesCommand,
   AdminDeleteUserCommand,
   AdminDisableUserCommand,
   AdminEnableUserCommand,
   AdminGetUserCommand,
   AdminRemoveUserFromGroupCommand,
-  AdminResetUserPasswordCommand,
+  AdminSetUserPasswordCommand,
   AdminUpdateUserAttributesCommand,
   CognitoIdentityProviderClient,
   ListUsersCommand,
@@ -28,11 +30,13 @@ type User = {
   enabled: boolean;
   status: string | null;
   createdAt: string | null;
+  temporaryPassword?: string;
 };
 
 type Arguments = {
   id?: string;
-  email?: string;
+  username?: string;
+  email?: string | null;
   name?: string | null;
   role?: string;
   enabled?: boolean | null;
@@ -40,6 +44,35 @@ type Arguments = {
 
 const client = new CognitoIdentityProviderClient();
 const UserPoolId = process.env.AMPLIFY_AUTH_USERPOOL_ID;
+
+const USERNAME_PATTERN = /^[a-zA-Z0-9._-]{3,64}$/;
+
+// Ambiguous characters (0/O, 1/l/I) are left out so the password is easy to
+// read out or copy by hand.
+const PASSWORD_CHARACTERS = [
+  "ABCDEFGHJKLMNPQRSTUVWXYZ",
+  "abcdefghijkmnopqrstuvwxyz",
+  "23456789",
+  "!@#$%&*?",
+];
+
+/** A random password meeting the pool policy: upper, lower, digit, symbol. */
+const generatePassword = (length = 12) => {
+  const pick = (characters: string) => characters[randomInt(characters.length)];
+  const all = PASSWORD_CHARACTERS.join("");
+  const characters = [
+    ...PASSWORD_CHARACTERS.map(pick),
+    ...Array.from({ length: length - PASSWORD_CHARACTERS.length }, () =>
+      pick(all)
+    ),
+  ];
+  // Shuffle so the required character types are not always first.
+  for (let i = characters.length - 1; i > 0; i--) {
+    const j = randomInt(i + 1);
+    [characters[i], characters[j]] = [characters[j], characters[i]];
+  }
+  return characters.join("");
+};
 
 const attribute = (attributes: AttributeType[] | undefined, name: string) =>
   attributes?.find((attr) => attr.Name === name)?.Value ?? null;
@@ -109,6 +142,29 @@ const setRole = async (Username: string, role: Role) => {
   );
 };
 
+const setEmail = async (Username: string, email: string | null) => {
+  if (email) {
+    await client.send(
+      new AdminUpdateUserAttributesCommand({
+        UserPoolId,
+        Username,
+        UserAttributes: [
+          { Name: "email", Value: email },
+          { Name: "email_verified", Value: "true" },
+        ],
+      })
+    );
+  } else {
+    await client.send(
+      new AdminDeleteUserAttributesCommand({
+        UserPoolId,
+        Username,
+        UserAttributeNames: ["email"],
+      })
+    );
+  }
+};
+
 const getUser = async (Username: string) => {
   const user = await client.send(
     new AdminGetUserCommand({ UserPoolId, Username })
@@ -141,26 +197,41 @@ const listUsers = async () => {
   return users.map((user) => toUser(user, roles));
 };
 
-const createUser = async ({ email, name, role }: Arguments) => {
+// The temporary password is returned once so the admin can hand it over.
+// If the user has an email, Cognito also emails them the invitation.
+const createUser = async ({ username, email, name, role }: Arguments) => {
   const validRole = assertRole(role);
-  const created = await client.send(
+  if (!username || !USERNAME_PATTERN.test(username)) {
+    throw new Error(
+      "Username must be 3 to 64 letters, numbers, dots, hyphens or underscores."
+    );
+  }
+  const temporaryPassword = generatePassword();
+
+  await client.send(
     new AdminCreateUserCommand({
       UserPoolId,
-      Username: email,
-      DesiredDeliveryMediums: ["EMAIL"],
+      Username: username,
+      TemporaryPassword: temporaryPassword,
+      ...(email
+        ? { DesiredDeliveryMediums: ["EMAIL"] }
+        : { MessageAction: "SUPPRESS" }),
       UserAttributes: [
-        { Name: "email", Value: email },
-        { Name: "email_verified", Value: "true" },
+        ...(email
+          ? [
+              { Name: "email", Value: email },
+              { Name: "email_verified", Value: "true" },
+            ]
+          : []),
         ...(name ? [{ Name: "name", Value: name }] : []),
       ],
     })
   );
-  const Username = created.User!.Username!;
-  await setRole(Username, validRole);
-  return getUser(Username);
+  await setRole(username, validRole);
+  return { ...(await getUser(username)), temporaryPassword };
 };
 
-const updateUser = async ({ id, name, role, enabled }: Arguments) => {
+const updateUser = async ({ id, email, name, role, enabled }: Arguments) => {
   const Username = id!;
   if (name !== undefined) {
     await client.send(
@@ -170,6 +241,9 @@ const updateUser = async ({ id, name, role, enabled }: Arguments) => {
         UserAttributes: [{ Name: "name", Value: name ?? "" }],
       })
     );
+  }
+  if (email !== undefined) {
+    await setEmail(Username, email || null);
   }
   if (role) {
     await setRole(Username, assertRole(role));
@@ -187,32 +261,26 @@ const deleteUser = async ({ id }: Arguments) => {
   return true;
 };
 
-// Invited users who never signed in get a new invitation; everyone else
-// gets a password reset code by email.
+// Sets a new temporary password, which the user must change at next sign-in.
 const resetUserPassword = async ({ id }: Arguments) => {
-  const user = await getUser(id!);
-  if (user.status === "FORCE_CHANGE_PASSWORD") {
-    await client.send(
-      new AdminCreateUserCommand({
-        UserPoolId,
-        Username: user.email!,
-        MessageAction: "RESEND",
-        DesiredDeliveryMediums: ["EMAIL"],
-      })
-    );
-  } else {
-    await client.send(
-      new AdminResetUserPasswordCommand({ UserPoolId, Username: user.id })
-    );
-  }
-  return true;
+  const temporaryPassword = generatePassword();
+  await client.send(
+    new AdminSetUserPasswordCommand({
+      UserPoolId,
+      Username: id,
+      Password: temporaryPassword,
+      Permanent: false,
+    })
+  );
+  return temporaryPassword;
 };
 
 // Stops an admin from locking themselves out.
 const assertNotSelf = (event: AppSyncResolverEvent<Arguments>) => {
   const identity = event.identity as AppSyncIdentityCognito | null;
   const { id, role, enabled } = event.arguments;
-  const isSelf = id === identity?.username || id === identity?.sub;
+  const isSelf =
+    id !== undefined && (id === identity?.username || id === identity?.sub);
   if (!isSelf) {
     return;
   }

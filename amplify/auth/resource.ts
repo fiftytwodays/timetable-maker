@@ -3,6 +3,8 @@ import { defineAuth } from "@aws-amplify/backend";
 import { manageUsers } from "../functions/manage-users/resource";
 
 export const auth = defineAuth({
+  // Email stays enabled for invitations and password recovery; backend.ts
+  // switches the sign-in name to a username and makes email optional.
   loginWith: {
     email: true,
   },
@@ -13,6 +15,7 @@ export const auth = defineAuth({
       .to([
         "createUser",
         "deleteUser",
+        "deleteUserAttributes",
         "disableUser",
         "enableUser",
         "getUser",
@@ -20,7 +23,7 @@ export const auth = defineAuth({
         "listUsersInGroup",
         "addUserToGroup",
         "removeUserFromGroup",
-        "resetUserPassword",
+        "setUserPassword",
         "updateUserAttributes",
       ]),
   ],
