@@ -6,7 +6,7 @@ Timetables, checklists and activities for your school. SchoolDay (formerly Timet
 - **User management**: a Lambda function ([amplify/functions/manage-users](amplify/functions/manage-users)) that admins call to list, create, update and delete Cognito users and to set temporary passwords.
 - **Data**: AWS AppSync + Amazon DynamoDB, defined in [amplify/data/resource.ts](amplify/data/resource.ts).
 - **Storage**: Amazon S3 for the school logo, defined in [amplify/storage/resource.ts](amplify/storage/resource.ts).
-- **Hosting**: Amplify Hosting serves the static export (`out/`), as configured in [amplify.yml](amplify.yml).
+- **Hosting**: Amplify Hosting runs the Next.js app server-side (`.next/`), as configured in [amplify.yml](amplify.yml).
 
 ## Prerequisites
 
