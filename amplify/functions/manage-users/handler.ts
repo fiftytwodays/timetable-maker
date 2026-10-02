@@ -240,18 +240,20 @@ const createUser = async ({ username, email, name, role }: Arguments) => {
   return { ...(await getUser(username)), temporaryPassword };
 };
 
+// Arguments the client did not send arrive as null, so only a string is a
+// change; an empty string clears the value.
 const updateUser = async ({ id, email, name, role, enabled }: Arguments) => {
   const Username = id!;
-  if (name !== undefined) {
+  if (typeof name === "string") {
     await client.send(
       new AdminUpdateUserAttributesCommand({
         UserPoolId,
         Username,
-        UserAttributes: [{ Name: "name", Value: name ?? "" }],
+        UserAttributes: [{ Name: "name", Value: name }],
       })
     );
   }
-  if (email !== undefined) {
+  if (typeof email === "string") {
     await setEmail(Username, email || null);
   }
   if (role) {
