@@ -13,7 +13,7 @@ const selectionSet = [
   "day.name",
   "period.id",
   "period.name",
-  "period.duration",
+  "period.type",
   "csta.id",
   "csta.name",
   "csta.classId",

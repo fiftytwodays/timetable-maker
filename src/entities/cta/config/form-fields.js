@@ -14,7 +14,7 @@ const toOptions = (records = []) =>
 const byWeekday = (a, b) =>
   WEEKDAYS.indexOf(a?.name) - WEEKDAYS.indexOf(b?.name);
 
-export const getFormFields = ({ associations, days, periods }) => [
+export const getFormFields = ({ associations, days, periods = [] }) => [
   {
     name: "cstaId",
     label: "Association",
@@ -37,7 +37,8 @@ export const getFormFields = ({ associations, days, periods }) => [
     type: "select",
     required: true,
     placeholder: "Select a period",
-    options: toOptions(periods),
+    // Breaks cannot hold lessons.
+    options: toOptions(periods.filter((period) => period.type !== "BREAK")),
   },
 ];
 

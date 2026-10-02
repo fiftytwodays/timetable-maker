@@ -27,11 +27,18 @@ function StudentsTimetableList({
     () => getAllStudentsTimetable(selectedClass)
   );
 
+  const tableData = generateTimetable(data);
+
   return (
     <EntityList
       isLoading={isLoading || isStudentesTimetableLoading}
-      columns={generateTimetableColumns({ columns, periods, logoURL })}
-      data={generateTimetable(data)}
+      columns={generateTimetableColumns({
+        columns,
+        periods,
+        rowCount: tableData.length,
+        logoURL,
+      })}
+      data={tableData}
       reloadData={reloadData}
       rowKey="key"
       totalCount={data?.length || 0}

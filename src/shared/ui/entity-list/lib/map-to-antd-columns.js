@@ -23,7 +23,7 @@ export default function mapToAntDColumns(columns, data) {
       if (column?.type === "break") {
         return (
           <Flex justify="center">
-            <VerticalText>Break</VerticalText>
+            <VerticalText>{column?.breakLabel || "Break"}</VerticalText>
           </Flex>
         );
       } else if (!item) {

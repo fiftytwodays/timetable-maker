@@ -42,9 +42,14 @@ const schema = a
       timetableEntries: a.hasMany("ClassTimetable", "dayId"),
     }),
 
+    // A lesson or a break in the school day. Timetable columns follow the
+    // periods in start time order.
     Period: a.model({
       name: a.string(),
-      duration: a.string(),
+      type: a.enum(["LESSON", "BREAK"]),
+      // 24-hour "HH:mm"
+      startTime: a.string(),
+      endTime: a.string(),
       timetableEntries: a.hasMany("ClassTimetable", "periodId"),
     }),
 

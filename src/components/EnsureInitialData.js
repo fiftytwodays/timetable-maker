@@ -3,6 +3,14 @@ import { mutate } from "swr";
 
 import { client, unwrap } from "@/shared/lib/amplify";
 
+const lesson = (id, name, startTime, endTime) => ({
+  id,
+  name,
+  type: "LESSON",
+  startTime,
+  endTime,
+});
+
 // The default school, days and periods for a new deployment.
 // Fixed ids make the seeding idempotent if two users sign in at the same time.
 const INITIAL_DATA = {
@@ -25,10 +33,17 @@ const INITIAL_DATA = {
     { id: "saturday", name: "Saturday" },
   ],
   Period: [
-    { id: "p1", name: "P1", duration: "10:00 - 11:30" },
-    { id: "p2", name: "P2", duration: "11:30 - 1:00" },
-    { id: "p3", name: "P3", duration: "2:00- 3:30" },
-    { id: "p4", name: "P4", duration: "3:30 - 5:00" },
+    lesson("p1", "P1", "10:00", "11:30"),
+    lesson("p2", "P2", "11:30", "13:00"),
+    {
+      id: "break",
+      name: "Break",
+      type: "BREAK",
+      startTime: "13:00",
+      endTime: "14:00",
+    },
+    lesson("p3", "P3", "14:00", "15:30"),
+    lesson("p4", "P4", "15:30", "17:00"),
   ],
 };
 

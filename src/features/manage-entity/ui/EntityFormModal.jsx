@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Button, Flex, Form, Input, Modal, Select } from "antd";
+import { Button, Flex, Form, Input, Modal, Select, TimePicker } from "antd";
+import dayjs from "dayjs";
 import {
   ArrowDownOutlined,
   ArrowUpOutlined,
@@ -85,6 +86,20 @@ function FieldInput({ field, ...inputProps }) {
       />
     );
   }
+  if (field.type === "time") {
+    return (
+      <TimePicker
+        {...inputProps}
+        format="h:mm A"
+        use12Hours
+        minuteStep={5}
+        needConfirm={false}
+        placeholder={field.placeholder}
+        disabled={field.disabled}
+        style={{ width: "100%" }}
+      />
+    );
+  }
   if (field.type === "textarea") {
     return (
       <Input.TextArea
@@ -103,6 +118,14 @@ function FieldInput({ field, ...inputProps }) {
     />
   );
 }
+
+// Time fields store a 24-hour "HH:mm" string; the picker works with dayjs.
+const timeValueProps = {
+  getValueProps: (value) => ({
+    value: value ? dayjs(`2000-01-01T${value}`) : null,
+  }),
+  normalize: (value) => (value ? value.format("HH:mm") : null),
+};
 
 function EntityFormModal({
   open,
@@ -153,6 +176,7 @@ function EntityFormModal({
               extra={field.extra}
               rules={field.rules}
               initialValue={field.initialValue}
+              {...(field.type === "time" && timeValueProps)}
             >
               <FieldInput field={field} />
             </Form.Item>

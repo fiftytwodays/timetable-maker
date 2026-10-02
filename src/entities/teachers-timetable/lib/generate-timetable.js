@@ -13,7 +13,8 @@ export const generateTimetable = (apiResponse) => {
   };
   apiResponse.forEach((item) => {
     const dayName = item?.expand?.day?.name;
-    const periodName = item?.expand?.period?.name;
+    // Lesson columns are keyed by period id (see generateTimetableColumns).
+    const periodId = item?.expand?.period?.id;
     const subjectInfo =
       item?.expand?.class_sub_teach_ass?.expand?.subject_name?.name;
 
@@ -24,7 +25,7 @@ export const generateTimetable = (apiResponse) => {
       data[dayName] = { day: dayName };
     }
 
-    data[dayName][periodName] = [subjectInfo, classInfo];
+    data[dayName][periodId] = [subjectInfo, classInfo];
   });
 
   const tableData = Object.values(data);

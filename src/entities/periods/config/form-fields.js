@@ -1,22 +1,36 @@
+import { PERIOD_TYPE_LABELS } from "./columns";
+
 export const formFields = [
   {
     name: "name",
     label: "Name",
     required: true,
     unique: true,
-    placeholder: "P1",
-    // The timetable layouts only have columns for P1 to P5.
-    extra: "One of P1 to P5, matching the timetable columns.",
-    rules: [
-      {
-        pattern: /^P[1-5]$/,
-        message: "Use one of P1, P2, P3, P4 or P5",
-      },
-    ],
+    placeholder: "P1 or Lunch break",
+    extra: "Shown as the column heading in the timetables.",
   },
   {
-    name: "duration",
-    label: "Duration",
-    placeholder: "10:00 - 11:30",
+    name: "type",
+    label: "Type",
+    type: "select",
+    required: true,
+    initialValue: "LESSON",
+    extra: "Breaks appear in the timetables but cannot hold lessons.",
+    options: Object.entries(PERIOD_TYPE_LABELS).map(([value, label]) => ({
+      value,
+      label,
+    })),
+  },
+  {
+    name: "startTime",
+    label: "Start time",
+    type: "time",
+    required: true,
+  },
+  {
+    name: "endTime",
+    label: "End time",
+    type: "time",
+    required: true,
   },
 ];

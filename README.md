@@ -65,9 +65,11 @@ Admins cannot delete, disable or demote their own account.
 
 ## Managing data
 
-The first time someone signs in to a new deployment, the app creates the initial school record, the days (Monday to Saturday) and the periods P1 to P4. Each table is only seeded while it is empty, so periods you later edit or delete are not recreated.
+The first time someone signs in to a new deployment, the app creates the initial school record, the days (Monday to Saturday) and the periods: P1 (10:00–11:30), P2 (11:30–1:00), a Break (1:00–2:00), P3 (2:00–3:30) and P4 (3:30–5:00). Each table is only seeded while it is empty, so periods you later edit or delete are not recreated.
 
-Teachers, subjects, classes and periods can be added, edited and deleted from their pages in the app. Period names must be P1 to P5, because the timetables have a column for each of those. A record that is still in use (for example, a teacher in a class–subject–teacher association, or a period in the timetable) cannot be deleted until those references are removed.
+Teachers, subjects, classes and periods can be added, edited and deleted from their pages in the app. A record that is still in use (for example, a teacher in a class–subject–teacher association, or a period in the timetable) cannot be deleted until those references are removed.
+
+Each period is a **lesson** or a **break** with a start and end time. Periods cannot overlap. The timetables have one column per period, in time order: lessons show their name and time, and breaks span every day and show their name. Breaks cannot hold lessons, so they are left out of the Create timetable grid and the Class-Timetable association form, and a period already used in the timetable cannot be changed into a break.
 
 Class–subject–teacher associations and class-timetable entries can also be added, edited and deleted from their pages. Saving is refused if it would double-book a class or a teacher in the same day and period, and a class, subject and teacher can only be associated once.
 
