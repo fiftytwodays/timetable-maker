@@ -1,6 +1,6 @@
-# Timetable maker
+# SchoolDay
 
-A [Next.js](https://nextjs.org/) application for building school timetables, backed by [AWS Amplify Gen 2](https://docs.amplify.aws/nextjs/):
+Timetables, checklists and activities for your school. SchoolDay (formerly Timetable maker) is a [Next.js](https://nextjs.org/) application backed by [AWS Amplify Gen 2](https://docs.amplify.aws/nextjs/):
 
 - **Auth**: Amazon Cognito (username or email + password; email optional) with two roles, `ADMIN` and `TEACHER`. Self sign-up is disabled; admins create logins in the app.
 - **User management**: a Lambda function ([amplify/functions/manage-users](amplify/functions/manage-users)) that admins call to list, create, update and delete Cognito users and to set temporary passwords.

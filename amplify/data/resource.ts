@@ -3,7 +3,7 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { manageUsers } from "../functions/manage-users/resource";
 
 /**
- * Timetable maker data model. Admins can change everything; teachers can
+ * SchoolDay data model. Admins can change everything; teachers can
  * read. The user management operations are admin only.
  */
 const schema = a

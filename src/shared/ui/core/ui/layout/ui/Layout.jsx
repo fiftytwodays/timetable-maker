@@ -73,7 +73,7 @@ const AppLayout = ({ children, onSignOut, currentUser = {} }) => {
         }}
       >
         <Title level={4} style={{ margin: 0 }}>
-          Timetable maker
+          SchoolDay
         </Title>
         <Menu
           theme="dark"
@@ -100,7 +100,7 @@ const AppLayout = ({ children, onSignOut, currentUser = {} }) => {
           textAlign: "center",
         }}
       >
-        Timetable maker ©{new Date().getFullYear()} Created by Fiftytwodays
+        SchoolDay ©{new Date().getFullYear()} Created by Fiftytwodays
       </Footer>
     </Layout>
   );
