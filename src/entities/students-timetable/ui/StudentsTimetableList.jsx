@@ -51,9 +51,11 @@ function StudentsTimetableList({
       isBordered={true}
       showToolbar
       title={
-        <Text style={{ fontSize: "24px" }} strong>
-          {selectedClass}
-        </Text>
+        <div style={{ textAlign: "center" }}>
+          <Text style={{ fontSize: "24px" }} strong>
+            {selectedClass}
+          </Text>
+        </div>
       }
     />
   );

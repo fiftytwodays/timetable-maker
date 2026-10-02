@@ -49,7 +49,8 @@ function EditableTimetableList() {
         ? "Class timetables"
         : `Class timetable - ${selectedClass}`,
     periods,
-    logoURL: getImageUrl(schoolDetails?.[0]),
+    // A fresh signed URL, as the one loaded with the page may have expired.
+    getLogoURL: async () => getImageUrl((await getSchoolInfo())?.[0]),
     getTimetables: async () => {
       const entries = await listClassTimetable({ sort: "-created" });
       return selectedNames.map((name) => ({

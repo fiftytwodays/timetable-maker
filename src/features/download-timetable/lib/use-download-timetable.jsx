@@ -1,28 +1,50 @@
 import { useState } from "react";
 import { message } from "antd";
 
-// react-pdf only supports PNG and JPEG images.
-const PDF_IMAGE_TYPES = ["image/png", "image/jpeg"];
+const MAX_LOGO_SIZE = 400;
 
-// The logo is embedded as a data URL; a logo that cannot be loaded or is in
-// another format is left out rather than failing the download.
-const loadLogo = async (url) => {
-  if (!url) {
-    return null;
-  }
+// react-pdf only embeds PNG and JPEG, so the logo is redrawn as a PNG. This
+// accepts any format the browser can show (WebP, SVG, GIF, ...) and shrinks
+// large images to keep the file small.
+const toPngDataUrl = (blob) =>
+  new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(blob);
+    const image = new window.Image();
+    image.onload = () => {
+      const width = image.naturalWidth || MAX_LOGO_SIZE;
+      const height = image.naturalHeight || MAX_LOGO_SIZE;
+      const scale = Math.min(1, MAX_LOGO_SIZE / Math.max(width, height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(width * scale);
+      canvas.height = Math.round(height * scale);
+      canvas
+        .getContext("2d")
+        .drawImage(image, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("The logo is not an image the browser can read."));
+    };
+    image.src = url;
+  });
+
+// A logo that cannot be loaded is left out rather than failing the download.
+const loadLogo = async (getLogoURL) => {
   try {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    if (!response.ok || !PDF_IMAGE_TYPES.includes(blob.type)) {
+    const url = await getLogoURL?.();
+    if (!url) {
       return null;
     }
-    return await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  } catch {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`The logo could not be fetched (${response.status}).`);
+    }
+    return await toPngDataUrl(await response.blob());
+  } catch (error) {
+    console.warn("Logo left out of the PDF:", error);
+    message.warning("The school logo could not be added to the PDF.");
     return null;
   }
 };
@@ -43,12 +65,13 @@ const toFileName = (name) => `${name.replace(/[\\/:*?"<>|]/g, "-")}.pdf`;
 /**
  * Downloads timetables as an A4 landscape PDF. `getTimetables()` returns
  * `[{ title, rows }]`, one page each; `getCellLines(cell)` returns the lines
- * to show for a lesson cell. The PDF library is loaded on first use.
+ * to show for a lesson cell. `getLogoURL()` is called at download time
+ * because signed logo URLs expire. The PDF library is loaded on first use.
  */
 export default function useDownloadTimetable({
   fileName,
   periods = [],
-  logoURL,
+  getLogoURL,
   getTimetables,
   getCellLines,
 }) {
@@ -61,7 +84,7 @@ export default function useDownloadTimetable({
         await Promise.all([
           import("@react-pdf/renderer"),
           import("../ui/TimetableDocument"),
-          loadLogo(logoURL),
+          loadLogo(getLogoURL),
           getTimetables(),
         ]);
 
