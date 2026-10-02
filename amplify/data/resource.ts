@@ -1,8 +1,10 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
+import { manageUsers } from "../functions/manage-users/resource";
+
 /**
- * Timetable maker data model. Every signed-in user can read and write
- * every record.
+ * Timetable maker data model. Admins can change everything; teachers can
+ * read. The user management operations are admin only.
  */
 const schema = a
   .schema({
@@ -23,7 +25,11 @@ const schema = a
 
     Teacher: a.model({
       name: a.string(),
+      // Login linked to this teacher: the Cognito user's sub and email.
+      userId: a.string(),
+      email: a.string(),
       associations: a.hasMany("ClassSubjectTeacherAssociation", "teacherId"),
+      checklistAssignments: a.hasMany("ChecklistAssignment", "teacherId"),
     }),
 
     Subject: a.model({
@@ -68,8 +74,89 @@ const schema = a
       periodId: a.id(),
       period: a.belongsTo("Period", "periodId"),
     }),
+
+    Checklist: a.model({
+      title: a.string().required(),
+      description: a.string(),
+      frequency: a.enum(["DAILY", "WEEKLY", "ONCE"]),
+      items: a.hasMany("ChecklistItem", "checklistId"),
+      assignments: a.hasMany("ChecklistAssignment", "checklistId"),
+    }),
+
+    // One activity to check off within a checklist.
+    ChecklistItem: a.model({
+      checklistId: a.id().required(),
+      checklist: a.belongsTo("Checklist", "checklistId"),
+      title: a.string().required(),
+      sortOrder: a.integer(),
+    }),
+
+    // Links a checklist to a teacher who has to complete it.
+    ChecklistAssignment: a.model({
+      checklistId: a.id().required(),
+      checklist: a.belongsTo("Checklist", "checklistId"),
+      teacherId: a.id().required(),
+      teacher: a.belongsTo("Teacher", "teacherId"),
+    }),
+
+    User: a.customType({
+      id: a.string().required(),
+      sub: a.string(),
+      email: a.string(),
+      name: a.string(),
+      role: a.string(),
+      enabled: a.boolean(),
+      status: a.string(),
+      createdAt: a.string(),
+    }),
+
+    listUsers: a
+      .query()
+      .returns(a.ref("User").array())
+      .authorization((allow) => [allow.group("ADMIN")])
+      .handler(a.handler.function(manageUsers)),
+
+    createUser: a
+      .mutation()
+      .arguments({
+        email: a.string().required(),
+        name: a.string(),
+        role: a.string().required(),
+      })
+      .returns(a.ref("User"))
+      .authorization((allow) => [allow.group("ADMIN")])
+      .handler(a.handler.function(manageUsers)),
+
+    updateUser: a
+      .mutation()
+      .arguments({
+        id: a.string().required(),
+        name: a.string(),
+        role: a.string(),
+        enabled: a.boolean(),
+      })
+      .returns(a.ref("User"))
+      .authorization((allow) => [allow.group("ADMIN")])
+      .handler(a.handler.function(manageUsers)),
+
+    deleteUser: a
+      .mutation()
+      .arguments({ id: a.string().required() })
+      .returns(a.boolean())
+      .authorization((allow) => [allow.group("ADMIN")])
+      .handler(a.handler.function(manageUsers)),
+
+    resetUserPassword: a
+      .mutation()
+      .arguments({ id: a.string().required() })
+      .returns(a.boolean())
+      .authorization((allow) => [allow.group("ADMIN")])
+      .handler(a.handler.function(manageUsers)),
   })
-  .authorization((allow) => [allow.authenticated()]);
+  .authorization((allow) => [
+    allow.group("ADMIN"),
+    allow.group("TEACHER").to(["read"]),
+  ]);
 
 export type Schema = ClientSchema<typeof schema>;
 
