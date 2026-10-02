@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button, Flex, Form, Input, Modal, Select, TimePicker } from "antd";
 import dayjs from "dayjs";
 import {
@@ -132,10 +132,15 @@ function EntityFormModal({
   title,
   fields = [],
   initialValues,
+  formKey,
   onSubmit,
   onCancel,
 }) {
-  const [form] = Form.useForm();
+  // A shared useForm instance would keep the previous record's values after
+  // the modal closes, and they would win over the next record's
+  // initialValues. Each opening mounts a new Form (keyed by formKey), which
+  // creates its own instance.
+  const formRef = useRef(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const onFinish = async (values) => {
@@ -152,13 +157,14 @@ function EntityFormModal({
       open={open}
       title={title}
       okText="Save"
-      onOk={() => form.submit()}
+      onOk={() => formRef.current?.submit()}
       onCancel={onCancel}
       confirmLoading={isSaving}
       destroyOnClose
     >
       <Form
-        form={form}
+        key={formKey}
+        ref={formRef}
         layout="vertical"
         preserve={false}
         initialValues={initialValues}

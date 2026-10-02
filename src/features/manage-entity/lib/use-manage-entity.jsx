@@ -53,8 +53,15 @@ export default function useManageEntity({
 }) {
   // null: modal closed, {}: creating, record: editing
   const [editingRecord, setEditingRecord] = useState(null);
+  // Changes on every opening so the form starts from the record's values.
+  const [formKey, setFormKey] = useState(0);
   const label = entityName.toLowerCase();
   const isEditing = Boolean(editingRecord?.id);
+
+  const openForm = (record) => {
+    setEditingRecord(record);
+    setFormKey((key) => key + 1);
+  };
 
   const visibleFields = fields.filter(
     (field) => isEditing || !field.hiddenOnCreate
@@ -137,7 +144,7 @@ export default function useManageEntity({
     <Button
       type="primary"
       icon={<PlusOutlined />}
-      onClick={() => setEditingRecord({})}
+      onClick={() => openForm({})}
     >
       Add {label}
     </Button>
@@ -153,7 +160,7 @@ export default function useManageEntity({
         <Button
           size="small"
           icon={<EditOutlined />}
-          onClick={() => setEditingRecord(record)}
+          onClick={() => openForm(record)}
         >
           Edit
         </Button>
@@ -178,6 +185,7 @@ export default function useManageEntity({
       title={isEditing ? `Edit ${label}` : `Add ${label}`}
       fields={formFields}
       initialValues={editingRecord || {}}
+      formKey={formKey}
       onSubmit={onSubmit}
       onCancel={() => setEditingRecord(null)}
     />
@@ -187,7 +195,7 @@ export default function useManageEntity({
     addButton,
     actionsColumn,
     formModal,
-    openCreate: (initialValues = {}) => setEditingRecord(initialValues),
-    openEdit: (record) => setEditingRecord(record),
+    openCreate: (initialValues = {}) => openForm(initialValues),
+    openEdit: openForm,
   };
 }
