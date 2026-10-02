@@ -26,8 +26,11 @@ const revalidateAll = () => mutate(() => true);
  *
  * Field options: `required`, `unique`, `rules`, `type` ("select",
  * "textarea" or "list"), `hiddenOnCreate` and `disabledOnEdit`.
- * `updateRecord(id, values, record)` and `deleteRecord(id, record)` also
- * receive the record being changed. `extraActions(record)` adds row buttons.
+ * `createRecord(values, initialValues)`, `updateRecord(id, values, record)`
+ * and `deleteRecord(id, record)` also receive the record being changed.
+ * `extraActions(record)` adds row buttons and `getDeleteDescription(record)`
+ * replaces the delete confirmation text. `openCreate(initialValues)` and
+ * `openEdit(record)` open the form from elsewhere.
  */
 export default function useManageEntity({
   entityName,
@@ -38,6 +41,7 @@ export default function useManageEntity({
   deleteRecord,
   getRecordLabel = (record) => record.name,
   extraActions,
+  getDeleteDescription = (record) => `Delete "${getRecordLabel(record)}"?`,
 }) {
   // null: modal closed, {}: creating, record: editing
   const [editingRecord, setEditingRecord] = useState(null);
@@ -96,7 +100,7 @@ export default function useManageEntity({
         await updateRecord(editingRecord.id, trimValues(values), editingRecord);
         message.success(`${entityName} updated!`);
       } else {
-        await createRecord(trimValues(values));
+        await createRecord(trimValues(values), editingRecord);
         message.success(`${entityName} created!`);
       }
       setEditingRecord(null);
@@ -144,7 +148,7 @@ export default function useManageEntity({
         </Button>
         <Popconfirm
           title={`Delete ${label}`}
-          description={`Delete "${getRecordLabel(record)}"?`}
+          description={getDeleteDescription(record)}
           okText="Delete"
           okButtonProps={{ danger: true }}
           onConfirm={() => onDelete(record)}
@@ -168,5 +172,11 @@ export default function useManageEntity({
     />
   );
 
-  return { addButton, actionsColumn, formModal };
+  return {
+    addButton,
+    actionsColumn,
+    formModal,
+    openCreate: (initialValues = {}) => setEditingRecord(initialValues),
+    openEdit: (record) => setEditingRecord(record),
+  };
 }

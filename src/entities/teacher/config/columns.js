@@ -15,12 +15,6 @@ export const columns = [
     sorter: true,
   },
   {
-    title: "Login",
-    dataIndex: "email",
-    width: 250,
-    hidden: false,
-  },
-  {
     title: "Created",
     dataIndex: "created",
     hidden: false,

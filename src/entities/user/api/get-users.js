@@ -19,10 +19,11 @@ export const getAllUsers = async () => {
       );
       return {
         ...user,
+        username: user.id,
         created: user.createdAt,
         teacherId: teacher?.id ?? null,
         teacherName: teacher?.name ?? null,
       };
     })
-    .sort((a, b) => (a.email || "").localeCompare(b.email || ""));
+    .sort((a, b) => a.username.localeCompare(b.username));
 };

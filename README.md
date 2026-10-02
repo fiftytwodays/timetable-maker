@@ -2,8 +2,8 @@
 
 A [Next.js](https://nextjs.org/) application for building school timetables, backed by [AWS Amplify Gen 2](https://docs.amplify.aws/nextjs/):
 
-- **Auth**: Amazon Cognito (email + password) with two roles, `ADMIN` and `TEACHER`. Self sign-up is disabled; admins create users in the app.
-- **User management**: a Lambda function ([amplify/functions/manage-users](amplify/functions/manage-users)) that admins call to list, invite, update and delete Cognito users.
+- **Auth**: Amazon Cognito (username + password, email optional) with two roles, `ADMIN` and `TEACHER`. Self sign-up is disabled; admins create logins in the app.
+- **User management**: a Lambda function ([amplify/functions/manage-users](amplify/functions/manage-users)) that admins call to list, create, update and delete Cognito users and to set temporary passwords.
 - **Data**: AWS AppSync + Amazon DynamoDB, defined in [amplify/data/resource.ts](amplify/data/resource.ts).
 - **Storage**: Amazon S3 for the school logo, defined in [amplify/storage/resource.ts](amplify/storage/resource.ts).
 - **Hosting**: Amplify Hosting serves the static export (`out/`), as configured in [amplify.yml](amplify.yml).
@@ -37,26 +37,31 @@ Open http://localhost:3000/ and sign in.
 
 ### Creating the first admin
 
-Users are managed from the **Users** page, which only admins can open, so the first admin is created from the command line. Use the user pool id from `amplify_outputs.json` (`auth.user_pool_id`):
+Logins are managed in the app, which only admins can do, so the first admin is created from the command line. Use the user pool id from `amplify_outputs.json` (`auth.user_pool_id`), and choose a username and a temporary password (at least 8 characters with upper case, lower case, a number and a symbol):
 
 ```bash
-aws cognito-idp admin-create-user   --user-pool-id <user-pool-id>   --username you@example.com   --user-attributes Name=email,Value=you@example.com Name=email_verified,Value=true
+aws cognito-idp admin-create-user   --user-pool-id <user-pool-id>   --username <username>   --temporary-password '<temporary-password>'   --message-action SUPPRESS
 
-aws cognito-idp admin-add-user-to-group   --user-pool-id <user-pool-id>   --username you@example.com   --group-name ADMIN
+aws cognito-idp admin-add-user-to-group   --user-pool-id <user-pool-id>   --username <username>   --group-name ADMIN
 ```
 
-The user is asked to set a new password the first time they sign in. Skip the first command if the user already exists. Group changes take effect the next time the user signs in.
+Sign in with that username and temporary password; you are asked to choose a new password. Group changes take effect the next time the user signs in.
 
-## Roles and users
+## Roles and logins
 
 | Role | Can do |
 | --- | --- |
-| `ADMIN` | Everything: manage entities, associations, timetables, checklists and users. |
+| `ADMIN` | Everything: manage entities, associations, timetables, checklists and logins. |
 | `TEACHER` | View the class, students and teachers timetables. |
 
-On the **Users** page, admins can invite a user (Cognito emails a temporary password), change their name, role or enabled status, resend the invitation or reset their password, and delete them. Admins cannot delete, disable or demote their own account.
+Users sign in with a **username**. An email address is optional: if one is set, Cognito also emails the invitation and the user can reset their own password with "Forgot your password?".
 
-A user can be linked to a teacher record, whatever their role. This is how the app knows which timetable and checklists belong to the person signed in; for example, a principal can be an `ADMIN` who is also linked to their teacher record so they can be assigned checklists. The linked login appears in the **Login** column on the Teachers page.
+When an admin creates a login or resets a password, the app generates a **temporary password and shows it once**, with a copy button, for the admin to hand over. The user must choose a new password at their next sign-in. If the temporary password is lost, reset the password again.
+
+- **Teachers page**: the main place to manage logins. Each teacher has a **Login** column: **Give login access** (username, optional email, role), or **Manage** to edit the login, reset the password, or remove access while keeping the teacher. Deleting a teacher also deletes their login. A teacher can have the `ADMIN` role, for example the principal, so they can manage the app and also be assigned checklists.
+- **Users page**: an overview of every login, including accounts that are not teachers (for example office staff). Logins can also be created, edited, linked to a teacher, reset and deleted here.
+
+Admins cannot delete, disable or demote their own account.
 
 ## Managing data
 
