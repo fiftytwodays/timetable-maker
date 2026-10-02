@@ -1,7 +1,7 @@
 import { toRecord } from "@/shared/lib/amplify";
 
 /**
- * Maps a ClassSubjectTeacherAssociation to the PocketBase shape the UI reads:
+ * Maps a ClassSubjectTeacherAssociation to the record shape the UI reads:
  * relation ids on `class_name`/`teacher_name`/`subject_name` and the related
  * records under `expand`. `name` is derived from the related records so it
  * stays current when a class, subject or teacher is renamed.

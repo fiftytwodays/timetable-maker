@@ -30,7 +30,7 @@ const selectionSet = [
 /**
  * Lists every class timetable entry with its relations expanded.
  * DynamoDB cannot filter on related records, so `filter` runs client side
- * against the mapped (PocketBase shaped) records.
+ * against the mapped records.
  */
 export const listClassTimetable = async ({
   sort = "created",

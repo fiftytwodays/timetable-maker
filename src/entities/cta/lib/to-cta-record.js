@@ -2,7 +2,7 @@ import { toRecord } from "@/shared/lib/amplify";
 import { toCstaRecord } from "@/entities/csta/lib/to-csta-record";
 
 /**
- * Maps a ClassTimetable entry to the PocketBase "CTA" shape the UI reads:
+ * Maps a ClassTimetable entry to the record shape the UI reads:
  * relation ids on `class_sub_teach_ass`/`day`/`period` and the related
  * records under `expand`.
  */

@@ -1,9 +1,8 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
 /**
- * Data model migrated from the former PocketBase collections.
- * Every signed-in user can read and
- * write every record, matching the open rules PocketBase had.
+ * Timetable maker data model. Every signed-in user can read and write
+ * every record.
  */
 const schema = a
   .schema({

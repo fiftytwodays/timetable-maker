@@ -36,7 +36,7 @@ export const listAll = async (model, options = {}) => {
 };
 
 /**
- * Sorts records using PocketBase style sort strings, e.g. "name" or "-created".
+ * Sorts records using sort strings, e.g. "name" or "-created".
  */
 export const sortRecords = (records, sort = "created") => {
   const descending = sort.startsWith("-");
@@ -81,8 +81,8 @@ export const assertNotReferenced = async (modelName, id, relation, usedBy) => {
 };
 
 /**
- * Maps an Amplify record to the shape the UI was built around
- * (PocketBase's `created`/`updated` timestamps).
+ * Maps an Amplify record to the shape the UI reads, exposing
+ * `createdAt`/`updatedAt` as `created`/`updated`.
  */
 export const toRecord = (item) =>
   item && {

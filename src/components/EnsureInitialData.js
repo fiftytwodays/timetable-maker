@@ -3,7 +3,7 @@ import { mutate } from "swr";
 
 import { client, unwrap } from "@/shared/lib/amplify";
 
-// The initial records previously shipped in the bundled PocketBase database.
+// The default school, days and periods for a new deployment.
 // Fixed ids make the seeding idempotent if two users sign in at the same time.
 const INITIAL_DATA = {
   School: [
