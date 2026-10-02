@@ -23,6 +23,11 @@ const revalidateAll = () => mutate(() => true);
 /**
  * Adds create, edit and delete to an entity list. Returns the toolbar button,
  * an actions column for the table and the form modal to render.
+ *
+ * Field options: `required`, `unique`, `rules`, `type` ("select",
+ * "textarea" or "list"), `hiddenOnCreate` and `disabledOnEdit`.
+ * `updateRecord(id, values, record)` and `deleteRecord(id, record)` also
+ * receive the record being changed. `extraActions(record)` adds row buttons.
  */
 export default function useManageEntity({
   entityName,
@@ -32,19 +37,26 @@ export default function useManageEntity({
   updateRecord,
   deleteRecord,
   getRecordLabel = (record) => record.name,
+  extraActions,
 }) {
   // null: modal closed, {}: creating, record: editing
   const [editingRecord, setEditingRecord] = useState(null);
   const label = entityName.toLowerCase();
+  const isEditing = Boolean(editingRecord?.id);
 
-  const formFields = fields.map((field) => ({
+  const visibleFields = fields.filter(
+    (field) => isEditing || !field.hiddenOnCreate
+  );
+
+  const formFields = visibleFields.map((field) => ({
     ...field,
+    disabled: isEditing && field.disabledOnEdit,
     rules: [
       ...(field.required
         ? [
             {
               required: true,
-              whitespace: true,
+              whitespace: !field.type,
               message: `Please ${
                 field.type === "select" ? "select" : "enter"
               } the ${field.label.toLowerCase()}`,
@@ -80,8 +92,8 @@ export default function useManageEntity({
 
   const onSubmit = async (values) => {
     try {
-      if (editingRecord?.id) {
-        await updateRecord(editingRecord.id, trimValues(values));
+      if (isEditing) {
+        await updateRecord(editingRecord.id, trimValues(values), editingRecord);
         message.success(`${entityName} updated!`);
       } else {
         await createRecord(trimValues(values));
@@ -96,7 +108,7 @@ export default function useManageEntity({
 
   const onDelete = async (record) => {
     try {
-      await deleteRecord(record.id);
+      await deleteRecord(record.id, record);
       message.success(`${entityName} deleted!`);
       revalidateAll();
     } catch (error) {
@@ -119,9 +131,10 @@ export default function useManageEntity({
   const actionsColumn = {
     title: "Actions",
     key: "actions",
-    width: 200,
+    width: extraActions ? 340 : 200,
     render: (_, record) => (
       <Space>
+        {extraActions?.(record)}
         <Button
           size="small"
           icon={<EditOutlined />}
@@ -147,7 +160,7 @@ export default function useManageEntity({
   const formModal = (
     <EntityFormModal
       open={editingRecord !== null}
-      title={editingRecord?.id ? `Edit ${label}` : `Add ${label}`}
+      title={isEditing ? `Edit ${label}` : `Add ${label}`}
       fields={formFields}
       initialValues={editingRecord || {}}
       onSubmit={onSubmit}

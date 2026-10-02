@@ -1,0 +1,28 @@
+import { client, unwrap } from "@/shared/lib/amplify";
+import { getAllTeachers } from "@/entities/teacher/api/get-teachers";
+
+/**
+ * Lists the Cognito users with their role and the teacher they are linked
+ * to (the Teacher record whose `userId` is the user's sub).
+ */
+export const getAllUsers = async () => {
+  const [users, teachers] = await Promise.all([
+    client.queries.listUsers().then(unwrap),
+    getAllTeachers(),
+  ]);
+
+  return users
+    .filter(Boolean)
+    .map((user) => {
+      const teacher = teachers.find(
+        (teacher) => teacher.userId && teacher.userId === user.sub
+      );
+      return {
+        ...user,
+        created: user.createdAt,
+        teacherId: teacher?.id ?? null,
+        teacherName: teacher?.name ?? null,
+      };
+    })
+    .sort((a, b) => (a.email || "").localeCompare(b.email || ""));
+};
