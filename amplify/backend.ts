@@ -21,10 +21,12 @@ cfnUserPool.adminCreateUserConfig = {
   allowAdminCreateUserOnly: true,
 };
 
-// Users sign in with a username. Email is optional and only used for
-// invitations and password recovery, so teachers without one can log in.
+// Users sign in with their username, or with their email if they have one.
+// Email is optional, so teachers without one can still log in; it is also
+// used for invitations and password recovery, and must be unique.
 // Changing how a user pool signs users in replaces the pool.
 cfnUserPool.usernameAttributes = undefined;
+cfnUserPool.aliasAttributes = ["email"];
 cfnUserPool.schema = (
   cfnUserPool.schema as aws_cognito.CfnUserPool.SchemaAttributeProperty[]
 ).map((attribute) =>

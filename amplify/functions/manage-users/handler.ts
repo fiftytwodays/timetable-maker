@@ -312,11 +312,22 @@ const operations: Record<string, (args: Arguments) => Promise<unknown>> = {
   resetUserPassword,
 };
 
+// Cognito errors an admin can act on, reworded for the app.
+const FRIENDLY_ERRORS: Record<string, string> = {
+  UsernameExistsException: "This username is already taken.",
+  AliasExistsException: "This email is already used by another login.",
+};
+
 export const handler = async (event: ResolverEvent) => {
   const operation = operations[event.fieldName];
   if (!operation) {
     throw new Error(`Unknown operation ${event.fieldName}`);
   }
   assertNotSelf(event);
-  return operation(event.arguments);
+  try {
+    return await operation(event.arguments);
+  } catch (error) {
+    const friendly = FRIENDLY_ERRORS[(error as Error).name];
+    throw friendly ? new Error(friendly) : error;
+  }
 };

@@ -2,7 +2,7 @@
 
 A [Next.js](https://nextjs.org/) application for building school timetables, backed by [AWS Amplify Gen 2](https://docs.amplify.aws/nextjs/):
 
-- **Auth**: Amazon Cognito (username + password, email optional) with two roles, `ADMIN` and `TEACHER`. Self sign-up is disabled; admins create logins in the app.
+- **Auth**: Amazon Cognito (username or email + password; email optional) with two roles, `ADMIN` and `TEACHER`. Self sign-up is disabled; admins create logins in the app.
 - **User management**: a Lambda function ([amplify/functions/manage-users](amplify/functions/manage-users)) that admins call to list, create, update and delete Cognito users and to set temporary passwords.
 - **Data**: AWS AppSync + Amazon DynamoDB, defined in [amplify/data/resource.ts](amplify/data/resource.ts).
 - **Storage**: Amazon S3 for the school logo, defined in [amplify/storage/resource.ts](amplify/storage/resource.ts).
@@ -54,7 +54,7 @@ Sign in with that username and temporary password; you are asked to choose a new
 | `ADMIN` | Everything: manage entities, associations, timetables, checklists and logins. |
 | `TEACHER` | View the class, students and teachers timetables. |
 
-Users sign in with a **username**. An email address is optional: if one is set, Cognito also emails the invitation and the user can reset their own password with "Forgot your password?".
+Users sign in with their **username**, or with their **email** if they have one. An email address is optional: if one is set, Cognito also emails the invitation and the user can reset their own password with "Forgot your password?". Each email can belong to only one login.
 
 When an admin creates a login or resets a password, the app generates a **temporary password and shows it once**, with a copy button, for the admin to hand over. The user must choose a new password at their next sign-in. If the temporary password is lost, reset the password again.
 

@@ -13,6 +13,22 @@ import { canAccess } from "@/shared/lib/access";
 import useCurrentUser from "@/shared/lib/use-current-user";
 import EnsureInitialData from "@/components/EnsureInitialData";
 
+// Users can sign in with their username or, if they have one, their email.
+const SIGN_IN_FORM_FIELDS = {
+  signIn: {
+    username: {
+      label: "Username or email",
+      placeholder: "Enter your username or email",
+    },
+  },
+  forgotPassword: {
+    username: {
+      label: "Username or email",
+      placeholder: "Enter your username or email",
+    },
+  },
+};
+
 function SignedInApp({ Component, pageProps, signOut }) {
   const router = useRouter();
   const currentUser = useCurrentUser();
@@ -56,7 +72,11 @@ export default function App({ Component, pageProps }) {
   return (
     <ConfigProvider theme={theme}>
       {/* Users are created by an administrator, so sign-up is hidden. */}
-      <Authenticator hideSignUp variation="modal">
+      <Authenticator
+        hideSignUp
+        variation="modal"
+        formFields={SIGN_IN_FORM_FIELDS}
+      >
         {({ signOut }) => (
           <SignedInApp
             Component={Component}

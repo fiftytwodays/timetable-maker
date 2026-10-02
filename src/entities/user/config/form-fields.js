@@ -19,7 +19,8 @@ const emailField = {
   name: "email",
   label: "Email (optional)",
   placeholder: "teacher@school.com",
-  extra: "If set, the invitation is emailed and the user can reset their own password.",
+  extra:
+    "If set, the user can also sign in with it and reset their own password, and the invitation is emailed. Each email can belong to one login only.",
   rules: [{ type: "email", message: "Please enter a valid email address" }],
 };
 
