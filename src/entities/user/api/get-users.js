@@ -3,7 +3,8 @@ import { getAllTeachers } from "@/entities/teacher/api/get-teachers";
 
 /**
  * Lists the Cognito users with their role and the teacher they are linked
- * to (the Teacher record whose `userId` is the user's sub).
+ * to (the Teacher record whose `userId` is the user's sub). A linked user's
+ * name is the teacher's name; `loginName` is the name stored in Cognito.
  */
 export const getAllUsers = async () => {
   const [users, teachers] = await Promise.all([
@@ -19,6 +20,8 @@ export const getAllUsers = async () => {
       );
       return {
         ...user,
+        name: teacher?.name ?? user.name,
+        loginName: user.name,
         username: user.id,
         created: user.createdAt,
         teacherId: teacher?.id ?? null,

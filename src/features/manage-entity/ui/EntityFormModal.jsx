@@ -165,23 +165,37 @@ function EntityFormModal({
         onFinish={onFinish}
         autoComplete="off"
       >
-        {fields.map((field) =>
-          field.type === "list" ? (
-            <ListField key={field.name} field={field} />
-          ) : (
-            <Form.Item
-              key={field.name}
-              name={field.name}
-              label={field.label}
-              extra={field.extra}
-              rules={field.rules}
-              initialValue={field.initialValue}
-              {...(field.type === "time" && timeValueProps)}
-            >
-              <FieldInput field={field} />
+        {fields.map((field) => {
+          const item =
+            field.type === "list" ? (
+              <ListField key={field.name} field={field} />
+            ) : (
+              <Form.Item
+                key={field.name}
+                name={field.name}
+                label={field.label}
+                extra={field.extra}
+                rules={field.rules}
+                initialValue={field.initialValue}
+                {...(field.type === "time" && timeValueProps)}
+              >
+                <FieldInput field={field} />
+              </Form.Item>
+            );
+
+          if (!field.hiddenWhen) {
+            return item;
+          }
+          // Re-render when the form changes, so the field can appear or
+          // disappear as other fields change. A hidden field is not submitted.
+          return (
+            <Form.Item key={field.name} noStyle shouldUpdate>
+              {({ getFieldsValue }) =>
+                field.hiddenWhen(getFieldsValue(true)) ? null : item
+              }
             </Form.Item>
-          )
-        )}
+          );
+        })}
       </Form>
     </Modal>
   );

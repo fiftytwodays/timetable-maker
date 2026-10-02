@@ -49,19 +49,19 @@ const enabledField = {
   ],
 };
 
-/** Fields for the Users page, where a login can be linked to any teacher. */
+/**
+ * Fields for the Users page, where a login can be linked to any teacher. A
+ * linked login uses the teacher's name, so Name is only asked for otherwise.
+ */
 export const getFormFields = ({ teachers = [] }) => [
   usernameField,
-  { name: "name", label: "Name" },
-  emailField,
-  roleField,
   {
     name: "teacherId",
     label: "Linked teacher",
     type: "select",
     placeholder: "Not a teacher",
     extra:
-      "Lets this user see their own timetable and checklists. Admins can be linked too.",
+      "The login uses the teacher's name and can see their own timetable and checklists. Admins can be linked too.",
     options: teachers.map((teacher) => ({
       value: teacher.id,
       label: teacher.username
@@ -69,6 +69,13 @@ export const getFormFields = ({ teachers = [] }) => [
         : teacher.name,
     })),
   },
+  {
+    name: "name",
+    label: "Name",
+    hiddenWhen: (values) => Boolean(values.teacherId),
+  },
+  emailField,
+  roleField,
   enabledField,
 ];
 

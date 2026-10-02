@@ -60,7 +60,14 @@ function TeachersList() {
     fields: formFields,
     getRecords: getAllTeachers,
     createRecord: createTeacher,
-    updateRecord: updateTeacher,
+    updateRecord: async (id, values, teacher) => {
+      await updateTeacher(id, values);
+      // A linked login uses the teacher's name, so rename it too.
+      const login = loginFor(teacher);
+      if (login && values.name !== teacher.name) {
+        await updateUser(login.id, {}, login);
+      }
+    },
     deleteRecord: async (id, teacher) => {
       if (teacher.userId && !users) {
         throw new Error("Logins could not be loaded. Try again.");

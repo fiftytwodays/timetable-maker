@@ -32,7 +32,8 @@ const revalidateAll = () => mutate(() => true);
  * an actions column for the table and the form modal to render.
  *
  * Field options: `required`, `unique`, `rules`, `type` ("select",
- * "textarea" or "list"), `hiddenOnCreate` and `disabledOnEdit`.
+ * "textarea", "time" or "list"), `hiddenOnCreate`, `disabledOnEdit` and
+ * `hiddenWhen(values)`, which hides (and skips submitting) the field.
  * `createRecord(values, initialValues)`, `updateRecord(id, values, record)`
  * and `deleteRecord(id, record)` also receive the record being changed.
  * `extraActions(record)` adds row buttons and `getDeleteDescription(record)`
