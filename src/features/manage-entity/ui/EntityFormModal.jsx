@@ -68,10 +68,13 @@ function ListField({ field }) {
   );
 }
 
-function FieldInput({ field }) {
+// Form.Item passes value, onChange and status props to its direct child, so
+// they must be forwarded to the actual input.
+function FieldInput({ field, ...inputProps }) {
   if (field.type === "select") {
     return (
       <Select
+        {...inputProps}
         showSearch
         allowClear={!field.required}
         mode={field.mode}
@@ -85,13 +88,20 @@ function FieldInput({ field }) {
   if (field.type === "textarea") {
     return (
       <Input.TextArea
+        {...inputProps}
         rows={3}
         placeholder={field.placeholder}
         disabled={field.disabled}
       />
     );
   }
-  return <Input placeholder={field.placeholder} disabled={field.disabled} />;
+  return (
+    <Input
+      {...inputProps}
+      placeholder={field.placeholder}
+      disabled={field.disabled}
+    />
+  );
 }
 
 function EntityFormModal({
