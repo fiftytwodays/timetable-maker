@@ -19,11 +19,11 @@ export default function mapToAntDColumns(columns, data) {
   return columns.map((column) => ({
     ...column,
     title: getColumnTitle(column, data),
-    render: (item) => {
+    render: column?.render || ((item) => {
       if (column?.type === "break") {
         return (
           <Flex justify="center">
-            <VerticalText>Break</VerticalText>
+            <VerticalText>{column?.breakLabel || "Break"}</VerticalText>
           </Flex>
         );
       } else if (!item) {
@@ -47,7 +47,7 @@ export default function mapToAntDColumns(columns, data) {
       } else {
         return item;
       }
-    },
+    }),
     ellipsis: true,
   }));
 }

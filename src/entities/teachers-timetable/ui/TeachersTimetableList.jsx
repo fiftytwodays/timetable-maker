@@ -26,11 +26,18 @@ function TeachersTimetableList({
     () => getAllTeachersTimetable(selectedTeacher)
   );
 
+  const tableData = generateTimetable(data);
+
   return (
     <EntityList
       isLoading={isLoading}
-      columns={generateTimetableColumns({ columns, periods, logoURL })}
-      data={generateTimetable(data)}
+      columns={generateTimetableColumns({
+        columns,
+        periods,
+        rowCount: tableData.length,
+        logoURL,
+      })}
+      data={tableData}
       reloadData={reloadData}
       rowKey="key"
       totalCount={data?.length || 0}
@@ -43,9 +50,11 @@ function TeachersTimetableList({
       isBordered={true}
       showToolbar
       title={
-        <Text style={{ fontSize: "24px" }} strong>
-          {selectedTeacher}
-        </Text>
+        <div style={{ textAlign: "center" }}>
+          <Text style={{ fontSize: "24px" }} strong>
+            {selectedTeacher}
+          </Text>
+        </div>
       }
     />
   );

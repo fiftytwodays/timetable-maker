@@ -1,4 +1,4 @@
-import pb from "@/shared/lib/pocketbase";
+import { client, unwrap, toRecord } from "@/shared/lib/amplify";
 
 export const updateClassTimetable = async (
   cta_id,
@@ -7,12 +7,13 @@ export const updateClassTimetable = async (
   period
 ) => {
   const data = {
-    class_sub_teach_ass: class_sub_teach_ass,
-    day: day,
-    period: period,
+    id: cta_id,
+    cstaId: class_sub_teach_ass,
+    dayId: day,
+    periodId: period,
   };
   if (cta_id) {
-    const result = await pb.collection("CTA").update(cta_id, data);
-    return result;
+    const result = await client.models.ClassTimetable.update(data);
+    return toRecord(unwrap(result));
   }
 };

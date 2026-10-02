@@ -1,5 +1,4 @@
-import { useState, useRef } from "react";
-import { useReactToPrint } from "react-to-print";
+import { useState } from "react";
 import { Button, Space } from "antd";
 import useSWR from "swr";
 
@@ -8,16 +7,16 @@ import { useClasses, SelectClass } from "@/features/change-class";
 import { getAllPeriods } from "@/entities/periods/api/get-periods";
 import { getSchoolInfo } from "@/entities/school/api/get-school-info";
 import { getImageUrl } from "@/entities/school/lib/get-image-url";
+import { listClassTimetable } from "@/entities/cta/api/list-class-timetable";
+import { generateTimetable } from "@/entities/class-timetable/lib/generate-timetable";
+import { useDownloadTimetable } from "@/features/download-timetable";
+
+const nameOf = (entry) =>
+  entry?.expand?.class_sub_teach_ass?.expand?.class_name?.name;
 
 function ClassTimetableList() {
   const [pageNo, setPageNo] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-
-  const componentRef = useRef();
-
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-  });
 
   const { selectedClass, onSelectedClassChange, classList } = useClasses("all");
 
@@ -30,6 +29,34 @@ function ClassTimetableList() {
     ["/api/school"],
     getSchoolInfo
   );
+
+  const selectedNames =
+    selectedClass === "all"
+      ? classList
+          .filter((item) => item?.value !== "all")
+          .map((item) => item?.value)
+      : [selectedClass];
+
+  const { download, isDownloading } = useDownloadTimetable({
+    fileName:
+      selectedClass === "all"
+        ? "Class timetables"
+        : `Class timetable - ${selectedClass}`,
+    periods,
+    // A fresh signed URL, as the one loaded with the page may have expired.
+    getLogoURL: async () => getImageUrl((await getSchoolInfo())?.[0]),
+    getTimetables: async () => {
+      const entries = await listClassTimetable({ sort: "-created" });
+      return selectedNames.map((name) => ({
+        title: name,
+        rows: generateTimetable(
+          entries.filter((entry) => nameOf(entry) === name)
+        ),
+      }));
+    },
+    // Subject and teacher; the third item is the entry id.
+    getCellLines: (cell) => cell?.slice(0, 2) ?? [],
+  });
 
   let AllTimetables = [];
 
@@ -61,11 +88,13 @@ function ClassTimetableList() {
           onSelectedClassChange={onSelectedClassChange}
           classList={classList}
         />
-        <Button onClick={handlePrint}>Download</Button>
+        <Button onClick={download} loading={isDownloading}>
+          Download
+        </Button>
       </Space>
 
       <div>
-        <div ref={componentRef}>
+        <div>
           {selectedClass === "all" ? (
             AllTimetables
           ) : (

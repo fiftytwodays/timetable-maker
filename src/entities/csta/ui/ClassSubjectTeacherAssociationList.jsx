@@ -9,6 +9,8 @@ function ClassSubjectTeacherAssociationList({
   setPageNo,
   pageSize,
   setPageSize,
+  extraColumns = [],
+  toolbarExtensions = [],
 }) {
   const { data: tableData, isLoading: isTableLoading } = useSWR(
     ["/api/csta-list"],
@@ -19,7 +21,7 @@ function ClassSubjectTeacherAssociationList({
     <div>
       <EntityList
         isLoading={isTableLoading}
-        columns={columns}
+        columns={[...columns, ...extraColumns]}
         data={tableData}
         rowKey="id"
         totalCount={tableData?.length}
@@ -28,6 +30,8 @@ function ClassSubjectTeacherAssociationList({
         pageSize={pageSize}
         setPageSize={setPageSize}
         isPaginationVisible={true}
+        showToolbar={toolbarExtensions.length > 0}
+        toolbarExtensions={toolbarExtensions}
       />
     </div>
   );

@@ -1,11 +1,7 @@
-import pb from "@/shared/lib/pocketbase";
+import { client, listAll, sortRecords, toRecord } from "@/shared/lib/amplify";
 
 export const getAllClasses = async () => {
-  const result = await pb
-    .collection("class")
-    .getFullList(200 /* batch size */, {
-      sort: "created",
-    });
+  const result = await listAll(client.models.SchoolClass);
 
-  return result;
+  return sortRecords(result, "created").map(toRecord);
 };

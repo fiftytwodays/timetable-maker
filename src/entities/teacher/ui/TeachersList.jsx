@@ -10,13 +10,15 @@ function TeachersList({
   setPageNo,
   pageSize,
   setPageSize,
+  extraColumns = [],
+  toolbarExtensions = [],
 }) {
   const { data, isLoading } = useSWR(["/api/teachers"], getAllTeachers);
 
   return (
     <EntityList
       isLoading={isLoading}
-      columns={columns}
+      columns={[...columns, ...extraColumns]}
       data={data}
       reloadData={reloadData}
       rowKey="id"
@@ -27,6 +29,8 @@ function TeachersList({
       setPageSize={setPageSize}
       showTableResizeOption
       isPaginationVisible={true}
+      showToolbar={toolbarExtensions.length > 0}
+      toolbarExtensions={toolbarExtensions}
     />
   );
 }

@@ -15,7 +15,7 @@ export default function Page({
   return (
     <_Page>
       <Head>
-        <title>{`TTM${header?.title ? ` - ${header?.title}` : ""}`}</title>
+        <title>{`SchoolDay${header?.title ? ` - ${header?.title}` : ""}`}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>

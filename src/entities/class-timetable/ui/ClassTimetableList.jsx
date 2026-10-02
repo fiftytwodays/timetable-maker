@@ -29,10 +29,6 @@ function ClassTimetableList({
 }) {
   const { Text } = Typography;
 
-  const getPeriodId = (periods, periodName) => {
-    return periods.find((period) => period?.name === periodName)?.id;
-  };
-
   const getDayId = (days, dayName) => {
     return days.find((day) => day?.name === dayName)?.id;
   };
@@ -55,8 +51,9 @@ function ClassTimetableList({
     },
   };
 
+  // `period` is the period id the cell's column is keyed by.
   const handleSave = async (cstaId, period, day, record) => {
-    const periodId = getPeriodId(periods, period);
+    const periodId = period;
     const dayId = getDayId(days, day);
     const ctaId = record[period]?.[2];
 
@@ -79,7 +76,8 @@ function ClassTimetableList({
       const { isUnique, description } = await checkForCtaConflict(
         cstaId,
         dayId,
-        periodId
+        periodId,
+        ctaId
       );
       if (!isUnique) {
         showMessage("warning", description);
@@ -103,18 +101,21 @@ function ClassTimetableList({
     }
   };
 
+  const tableData = generateTimetable(data);
+
   return (
     <EntityList
       isLoading={isLoading || isClassTimetableLoading}
       columns={generateTimetableColumns({
         columns,
         periods,
+        rowCount: tableData.length,
         selectedClass,
         isEditable,
         handleSave,
         logoURL,
       })}
-      data={generateTimetable(data, days, periods)}
+      data={tableData}
       reloadData={reloadData}
       rowKey="key"
       totalCount={data?.length || 0}
@@ -127,9 +128,11 @@ function ClassTimetableList({
       isBordered={true}
       showToolbar
       title={
-        <Text style={{ fontSize: "24px" }} strong>
-          {selectedClass}
-        </Text>
+        <div style={{ textAlign: "center" }}>
+          <Text style={{ fontSize: "24px" }} strong>
+            {selectedClass}
+          </Text>
+        </div>
       }
       isEditable={isEditable}
       components={isEditable && components}

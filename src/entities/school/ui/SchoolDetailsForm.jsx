@@ -18,14 +18,16 @@ const SchoolDetailsForm = ({ data, setIsEditing }) => {
   });
 
   const onFinish = async (values) => {
+    // A new upload replaces the logo, removing it clears the logo, and an
+    // untouched upload field keeps the current one.
     const saveResult = await updateSchoolInfo(data?.id, {
       ...values,
-      logo: values?.logo[0]?.originFileObj || null,
+      logo: values?.logo?.[0]?.originFileObj ?? (logo ? undefined : null),
     });
 
     mutate(["/api/school"]);
 
-    if (saveResult?.collectionId) {
+    if (saveResult?.id) {
       showMessage("success", "Details updated!");
     } else {
       showMessage("error", saveResult?.message);

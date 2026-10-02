@@ -1,13 +1,5 @@
 export const columns = [
   {
-    title: "Id",
-    dataIndex: "id",
-    width: 100,
-    hidden: false,
-    sorter: true,
-    link: true,
-  },
-  {
     title: "Association",
     dataIndex: ["expand", "class_sub_teach_ass", "name"],
     width: 300,
