@@ -35,5 +35,9 @@
     "eslint-config-next": "14.2.4",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "esbuild@0.25.12": true
   }
 }

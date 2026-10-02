@@ -49,9 +49,11 @@ The user is asked to set a new password the first time they sign in.
 
 ## Managing data
 
-The first time someone signs in, the app creates the initial school record, the days (Monday to Saturday) and the periods P1 to P4.
+The first time someone signs in to a new deployment, the app creates the initial school record, the days (Monday to Saturday) and the periods P1 to P4. Each table is only seeded while it is empty, so periods you later edit or delete are not recreated.
 
-The app has no screens for creating teachers, subjects, classes or class–subject–teacher associations. Previously these were managed in the PocketBase admin console. They are now managed in the **Amplify console → your app → Data → Data manager**.
+Teachers, subjects, classes and periods can be added, edited and deleted from their pages in the app. Period names must be P1 to P5, because the timetables have a column for each of those. A record that is still in use (for example, a teacher in a class–subject–teacher association, or a period in the timetable) cannot be deleted until those references are removed.
+
+Class–subject–teacher associations have no screen yet. Manage them in the **Amplify console → your app → Data → Data manager**.
 
 ## Deploying
 

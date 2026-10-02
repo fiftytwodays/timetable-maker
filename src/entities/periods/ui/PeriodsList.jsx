@@ -5,7 +5,15 @@ import { EntityList } from "@/shared/ui";
 import { columns } from "../config/columns";
 import { getAllPeriods } from "../api/get-periods";
 
-function PeriodsList({ reloadData, pageNo, setPageNo, pageSize, setPageSize }) {
+function PeriodsList({
+  reloadData,
+  pageNo,
+  setPageNo,
+  pageSize,
+  setPageSize,
+  extraColumns = [],
+  toolbarExtensions = [],
+}) {
   const [sort, setSort] = useState();
   const { data, isLoading } = useSWR([sort, "/api/periods"], () =>
     getAllPeriods(sort)
@@ -15,7 +23,7 @@ function PeriodsList({ reloadData, pageNo, setPageNo, pageSize, setPageSize }) {
     <div>
       <EntityList
         isLoading={isLoading}
-        columns={columns}
+        columns={[...columns, ...extraColumns]}
         data={data}
         reloadData={reloadData}
         rowKey="id"
@@ -27,6 +35,8 @@ function PeriodsList({ reloadData, pageNo, setPageNo, pageSize, setPageSize }) {
         setSort={setSort}
         showTableResizeOption
         isPaginationVisible={true}
+        showToolbar={toolbarExtensions.length > 0}
+        toolbarExtensions={toolbarExtensions}
       />
     </div>
   );

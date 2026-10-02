@@ -50,6 +50,37 @@ export const sortRecords = (records, sort = "created") => {
 };
 
 /**
+ * Builds create/update/delete functions for a model.
+ */
+export const createCrudApi = (modelName) => {
+  const model = () => client.models[modelName];
+
+  return {
+    create: async (values) => toRecord(unwrap(await model().create(values))),
+    update: async (id, values) =>
+      toRecord(unwrap(await model().update({ id, ...values }))),
+    remove: async (id) => unwrap(await model().delete({ id })),
+  };
+};
+
+/**
+ * Throws if the record still has related records through `relation`
+ * (a hasMany field), so deleting it would leave dangling references.
+ */
+export const assertNotReferenced = async (modelName, id, relation, usedBy) => {
+  const record = unwrap(
+    await client.models[modelName].get(
+      { id },
+      { selectionSet: ["id", `${relation}.id`] }
+    )
+  );
+
+  if (record?.[relation]?.length > 0) {
+    throw new Error(`It is still used in ${usedBy}. Remove those first.`);
+  }
+};
+
+/**
  * Maps an Amplify record to the shape the UI was built around
  * (PocketBase's `created`/`updated` timestamps).
  */

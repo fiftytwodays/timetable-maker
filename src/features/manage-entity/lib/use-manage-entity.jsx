@@ -1,0 +1,154 @@
+import { useState } from "react";
+import { Button, Popconfirm, Space, message } from "antd";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
+import { mutate } from "swr";
+
+import EntityFormModal from "../ui/EntityFormModal";
+
+const trimValues = (values) =>
+  Object.fromEntries(
+    Object.entries(values).map(([key, value]) => [
+      key,
+      typeof value === "string" ? value.trim() : value,
+    ])
+  );
+
+// Names are shown across timetables and lookups, so revalidate every list.
+const revalidateAll = () => mutate(() => true);
+
+/**
+ * Adds create, edit and delete to an entity list. Returns the toolbar button,
+ * an actions column for the table and the form modal to render.
+ */
+export default function useManageEntity({
+  entityName,
+  fields,
+  getRecords,
+  createRecord,
+  updateRecord,
+  deleteRecord,
+}) {
+  // null: modal closed, {}: creating, record: editing
+  const [editingRecord, setEditingRecord] = useState(null);
+  const label = entityName.toLowerCase();
+
+  const formFields = fields.map((field) => ({
+    ...field,
+    rules: [
+      ...(field.required
+        ? [
+            {
+              required: true,
+              whitespace: true,
+              message: `Please enter the ${field.label.toLowerCase()}`,
+            },
+          ]
+        : []),
+      ...(field.rules || []),
+      ...(field.unique
+        ? [
+            {
+              validator: async (_, value) => {
+                const normalized = value?.trim().toLowerCase();
+                if (!normalized) {
+                  return;
+                }
+                const records = await getRecords();
+                const isTaken = records.some(
+                  (record) =>
+                    record.id !== editingRecord?.id &&
+                    record[field.name]?.trim().toLowerCase() === normalized
+                );
+                if (isTaken) {
+                  throw new Error(
+                    `A ${label} with this ${field.label.toLowerCase()} already exists`
+                  );
+                }
+              },
+            },
+          ]
+        : []),
+    ],
+  }));
+
+  const onSubmit = async (values) => {
+    try {
+      if (editingRecord?.id) {
+        await updateRecord(editingRecord.id, trimValues(values));
+        message.success(`${entityName} updated!`);
+      } else {
+        await createRecord(trimValues(values));
+        message.success(`${entityName} created!`);
+      }
+      setEditingRecord(null);
+      revalidateAll();
+    } catch (error) {
+      message.error(error.message);
+    }
+  };
+
+  const onDelete = async (record) => {
+    try {
+      await deleteRecord(record.id);
+      message.success(`${entityName} deleted!`);
+      revalidateAll();
+    } catch (error) {
+      message.error(`Could not delete "${record.name}". ${error.message}`);
+    }
+  };
+
+  const addButton = (
+    <Button
+      type="primary"
+      icon={<PlusOutlined />}
+      onClick={() => setEditingRecord({})}
+    >
+      Add {label}
+    </Button>
+  );
+
+  const actionsColumn = {
+    title: "Actions",
+    key: "actions",
+    width: 200,
+    render: (_, record) => (
+      <Space>
+        <Button
+          size="small"
+          icon={<EditOutlined />}
+          onClick={() => setEditingRecord(record)}
+        >
+          Edit
+        </Button>
+        <Popconfirm
+          title={`Delete ${label}`}
+          description={`Delete "${record.name}"?`}
+          okText="Delete"
+          okButtonProps={{ danger: true }}
+          onConfirm={() => onDelete(record)}
+        >
+          <Button size="small" danger icon={<DeleteOutlined />}>
+            Delete
+          </Button>
+        </Popconfirm>
+      </Space>
+    ),
+  };
+
+  const formModal = (
+    <EntityFormModal
+      open={editingRecord !== null}
+      title={editingRecord?.id ? `Edit ${label}` : `Add ${label}`}
+      fields={formFields}
+      initialValues={editingRecord || {}}
+      onSubmit={onSubmit}
+      onCancel={() => setEditingRecord(null)}
+    />
+  );
+
+  return { addButton, actionsColumn, formModal };
+}
