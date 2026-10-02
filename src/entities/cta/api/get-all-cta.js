@@ -1,10 +1,7 @@
-import pb from "@/shared/lib/pocketbase";
+import { listClassTimetable } from "./list-class-timetable";
 
 export const getAllClassTimetableAssociation = async () => {
-  const result = await pb.collection("CTA").getFullList(200 /* batch size */, {
-    sort: "created",
-    expand: "class_sub_teach_ass, day, period",
-  });
+  const result = await listClassTimetable({ sort: "created" });
 
   return result;
 };

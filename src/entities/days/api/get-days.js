@@ -1,9 +1,7 @@
-import pb from "@/shared/lib/pocketbase";
+import { client, listAll, sortRecords, toRecord } from "@/shared/lib/amplify";
 
 export const getAllDays = async () => {
-  const result = await pb.collection("days").getFullList(200 /* batch size */, {
-    sort: "-created",
-  });
+  const result = await listAll(client.models.Day);
 
-  return result;
+  return sortRecords(result, "-created").map(toRecord);
 };

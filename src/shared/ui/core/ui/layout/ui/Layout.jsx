@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { Layout, Menu } from "antd";
+import { Button, Layout, Menu } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -55,7 +55,7 @@ const items = [
   },
 ];
 
-const AppLayout = ({ children }) => {
+const AppLayout = ({ children, onSignOut }) => {
   const router = useRouter();
   return (
     <Layout className="" style={{ minHeight: "100vh" }}>
@@ -81,6 +81,7 @@ const AppLayout = ({ children }) => {
             minWidth: 0,
           }}
         />
+        {onSignOut && <Button onClick={onSignOut}>Sign out</Button>}
       </Header>
       <Content>{children}</Content>
       <Footer

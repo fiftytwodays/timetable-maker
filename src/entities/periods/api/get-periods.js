@@ -1,11 +1,7 @@
-import pb from "@/shared/lib/pocketbase";
+import { client, listAll, sortRecords, toRecord } from "@/shared/lib/amplify";
 
 export const getAllPeriods = async (sort = "name") => {
-  const result = await pb
-    .collection("periods")
-    .getFullList(200 /* batch size */, {
-      sort: sort,
-    });
+  const result = await listAll(client.models.Period);
 
-  return result;
+  return sortRecords(result, sort).map(toRecord);
 };

@@ -1,46 +1,62 @@
-# Project Name
+# Timetable maker
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+A [Next.js](https://nextjs.org/) application for building school timetables, backed by [AWS Amplify Gen 2](https://docs.amplify.aws/nextjs/):
 
-## Getting Started
+- **Auth**: Amazon Cognito (email + password). Self sign-up is disabled; an administrator creates users.
+- **Data**: AWS AppSync + Amazon DynamoDB, defined in [amplify/data/resource.ts](amplify/data/resource.ts).
+- **Storage**: Amazon S3 for the school logo, defined in [amplify/storage/resource.ts](amplify/storage/resource.ts).
+- **Hosting**: Amplify Hosting serves the static export (`out/`), as configured in [amplify.yml](amplify.yml).
 
-You can run the application using the following methods
-1. Plain next.js 
-2. Tauri application
+## Prerequisites
 
-### Running as next.js application
-Start PocketBase
-Use the command below (for Linux):
+- Node.js 18.17 or later
+- An AWS account with credentials configured locally (`aws configure sso` or `aws configure`)
+
+## Local development
+
+Install dependencies:
+
 ```bash
-cd src-tauri/data/pb && ./pocketbase serve
-```
-Use the command below (for Windows):
-```bash
-cd src-tauri/data/pb
-pocketbase serve
+npm install
 ```
 
-Run the development server
+Start a personal cloud sandbox. This deploys the backend to your AWS account and writes `amplify_outputs.json`, which the frontend needs:
+
+```bash
+npx ampx sandbox
+```
+
+In a second terminal, run the development server:
+
 ```bash
 npm run dev
 ```
-Open http://localhost:3000/ with your browser to see the result.
 
-### Running as tauri application
-Please follow [Tauri Getting Started - Prerequisites](https://tauri.app/v1/guides/getting-started/prerequisites) for setting up tauri.
+Open http://localhost:3000/ and sign in.
 
-Run in development mode
+### Creating a user
+
+Self sign-up is disabled, so create users in the Cognito console (**Amplify console → your app → Authentication → Users**), or with the AWS CLI:
+
 ```bash
-npm run tauri dev
+aws cognito-idp admin-create-user \
+  --user-pool-id <user-pool-id from amplify_outputs.json> \
+  --username someone@example.com \
+  --user-attributes Name=email,Value=someone@example.com Name=email_verified,Value=true
 ```
-Run in production mode
-```bash
-npm run tauri build
-```
 
-Open http://localhost:8090/_/ with your browser to see the PocketBase console.
-Username: admin@timetable.com
-Password: timetableadmin
+The user is asked to set a new password the first time they sign in.
 
-## PocketBase data backup and restore
+## Managing data
 
+The first time someone signs in, the app creates the initial school record, the days (Monday to Saturday) and the periods P1 to P4.
+
+The app has no screens for creating teachers, subjects, classes or class–subject–teacher associations. Previously these were managed in the PocketBase admin console. They are now managed in the **Amplify console → your app → Data → Data manager**.
+
+## Deploying
+
+1. Push this repository to GitHub (or another Git provider).
+2. In the Amplify console, choose **Create new app** and connect the repository and branch.
+3. Amplify picks up [amplify.yml](amplify.yml). Each push deploys the backend for that branch, then builds and hosts the frontend.
+
+To remove a sandbox, run `npx ampx sandbox delete`.

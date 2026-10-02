@@ -1,6 +1,6 @@
-import pb from "@/shared/lib/pocketbase";
+import { client, unwrap } from "@/shared/lib/amplify";
 
 export const deleteClassTimetable = async (cta_id) => {
-  const result = await pb.collection("CTA").delete(cta_id);
-  return result;
+  const result = await client.models.ClassTimetable.delete({ id: cta_id });
+  return unwrap(result);
 };

@@ -1,13 +1,10 @@
-import pb from "@/shared/lib/pocketbase";
+import { listClassTimetable } from "@/entities/cta/api/list-class-timetable";
 
 export const getAllTeachersTimetable = async (selectedTeacher) => {
-  const filter = `class_sub_teach_ass.teacher_name.name='${selectedTeacher}'`;
-  const result = await pb.collection("CTA").getFullList(200 /* batch size */, {
-    sort: "-created",
-    filter: filter,
-    expand:
-      "class_sub_teach_ass, class_sub_teach_ass.subject_name, class_sub_teach_ass.class_name, day, period",
-  });
+  const filter = (entry) =>
+    entry?.expand?.class_sub_teach_ass?.expand?.teacher_name?.name ===
+    selectedTeacher;
+  const result = await listClassTimetable({ sort: "-created", filter });
 
   return result;
 };

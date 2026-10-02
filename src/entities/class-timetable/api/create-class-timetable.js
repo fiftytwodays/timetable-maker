@@ -1,4 +1,4 @@
-import pb from "@/shared/lib/pocketbase";
+import { client, unwrap, toRecord } from "@/shared/lib/amplify";
 
 export const createClassTimetable = async (
   class_sub_teach_ass,
@@ -6,11 +6,11 @@ export const createClassTimetable = async (
   period
 ) => {
   const data = {
-    class_sub_teach_ass: class_sub_teach_ass,
-    day: day,
-    period: period,
+    cstaId: class_sub_teach_ass,
+    dayId: day,
+    periodId: period,
   };
 
-  const result = await pb.collection("CTA").create(data);
-  return result;
+  const result = await client.models.ClassTimetable.create(data);
+  return toRecord(unwrap(result));
 };

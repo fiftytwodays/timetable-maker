@@ -1,7 +1,4 @@
-import pb from "@/shared/lib/pocketbase";
-
+// `logoUrl` is the signed S3 URL resolved by getSchoolInfo.
 export const getImageUrl = (record) => {
-  const firstFilename = record?.logo;
-  const url = pb.files.getUrl(record, firstFilename, { thumb: "100x250" });
-  return url;
+  return record?.logoUrl || "";
 };

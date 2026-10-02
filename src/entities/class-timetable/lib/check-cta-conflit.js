@@ -6,7 +6,11 @@ export async function checkForCtaConflict(cstaId, dayId, periodId) {
 
   const conflictList = await getAllClassTimetable(
     "",
-    `class_sub_teach_ass.teacher_name="${csta?.teacher_name}" && day="${dayId}" && period="${periodId}"`
+    (entry) =>
+      entry?.expand?.class_sub_teach_ass?.teacher_name ===
+        csta?.teacher_name &&
+      entry?.day === dayId &&
+      entry?.period === periodId
   );
 
   const className =

@@ -1,12 +1,27 @@
-import pb from "@/shared/lib/pocketbase";
+import { client, listAll, sortRecords } from "@/shared/lib/amplify";
+
+import { toCstaRecord } from "../lib/to-csta-record";
+
+const selectionSet = [
+  "id",
+  "name",
+  "classId",
+  "teacherId",
+  "subjectId",
+  "createdAt",
+  "updatedAt",
+  "schoolClass.id",
+  "schoolClass.name",
+  "teacher.id",
+  "teacher.name",
+  "subject.id",
+  "subject.name",
+];
 
 export const getAllClassSubjectTeacherAssociation = async () => {
-  const result = await pb
-    .collection("ClassSubjectTeacherAssociation")
-    .getFullList(200 /* batch size */, {
-      sort: "created",
-      expand: "class_name, teacher_name, subject_name",
-    });
+  const result = await listAll(client.models.ClassSubjectTeacherAssociation, {
+    selectionSet,
+  });
 
-  return result;
+  return sortRecords(result, "created").map(toCstaRecord);
 };
