@@ -1,5 +1,4 @@
-import { useState, useRef } from "react";
-import { useReactToPrint } from "react-to-print";
+import { useState } from "react";
 import { Button, Space } from "antd";
 import useSWR from "swr";
 
@@ -8,16 +7,16 @@ import { useTeachers, SelectTeacher } from "@/features/change-teacher";
 import { getAllPeriods } from "@/entities/periods/api/get-periods";
 import { getSchoolInfo } from "@/entities/school/api/get-school-info";
 import { getImageUrl } from "@/entities/school/lib/get-image-url";
+import { listClassTimetable } from "@/entities/cta/api/list-class-timetable";
+import { generateTimetable } from "@/entities/teachers-timetable/lib/generate-timetable";
+import { useDownloadTimetable } from "@/features/download-timetable";
+
+const nameOf = (entry) =>
+  entry?.expand?.class_sub_teach_ass?.expand?.teacher_name?.name;
 
 function TeachersTimetableList() {
   const [pageNo, setPageNo] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-
-  const componentRef = useRef();
-
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-  });
 
   const { selectedTeacher, onSelectedTeacherChange, teachersList } =
     useTeachers("all");
@@ -31,6 +30,33 @@ function TeachersTimetableList() {
     ["/api/school"],
     getSchoolInfo
   );
+
+  const selectedNames =
+    selectedTeacher === "all"
+      ? teachersList
+          .filter((item) => item?.value !== "all")
+          .map((item) => item?.value)
+      : [selectedTeacher];
+
+  const { download, isDownloading } = useDownloadTimetable({
+    fileName:
+      selectedTeacher === "all"
+        ? "Teachers timetables"
+        : `Teachers timetable - ${selectedTeacher}`,
+    periods,
+    logoURL: getImageUrl(schoolDetails?.[0]),
+    getTimetables: async () => {
+      const entries = await listClassTimetable({ sort: "-created" });
+      return selectedNames.map((name) => ({
+        title: name,
+        rows: generateTimetable(
+          entries.filter((entry) => nameOf(entry) === name)
+        ),
+      }));
+    },
+    // Subject and class.
+    getCellLines: (cell) => cell ?? [],
+  });
 
   let AllTimetables = [];
 
@@ -62,11 +88,13 @@ function TeachersTimetableList() {
           onSelectedTeacherChange={onSelectedTeacherChange}
           teachersList={teachersList}
         />
-        <Button onClick={handlePrint}>Download</Button>
+        <Button onClick={download} loading={isDownloading}>
+          Download
+        </Button>
       </Space>
 
       <div>
-        <div ref={componentRef}>
+        <div>
           {selectedTeacher === "all" ? (
             AllTimetables
           ) : (
