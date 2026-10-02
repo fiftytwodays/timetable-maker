@@ -53,12 +53,6 @@ const schema = a
       timetableEntries: a.hasMany("ClassTimetable", "periodId"),
     }),
 
-    Setting: a.model({
-      key: a.string(),
-      value: a.string(),
-      description: a.string(),
-    }),
-
     ClassSubjectTeacherAssociation: a.model({
       name: a.string(),
       classId: a.id(),
