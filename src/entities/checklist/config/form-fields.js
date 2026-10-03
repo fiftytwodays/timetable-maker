@@ -1,4 +1,4 @@
-import { FREQUENCY_LABELS } from "./columns";
+import { FREQUENCY_LABELS, LATE_LIMIT_LABELS } from "./columns";
 
 export const getFormFields = ({ teachers = [] }) => [
   {
@@ -24,6 +24,28 @@ export const getFormFields = ({ teachers = [] }) => [
       value,
       label,
     })),
+  },
+  {
+    name: "lateLimit",
+    label: "Fill in past days",
+    type: "select",
+    required: true,
+    initialValue: "SCHOOL_DEFAULT",
+    extra:
+      "How far back teachers can fill in this checklist. The school default is set on the School page.",
+    options: Object.entries(LATE_LIMIT_LABELS).map(([value, label]) => ({
+      value,
+      label,
+    })),
+  },
+  {
+    name: "lateDays",
+    label: "Days back",
+    type: "number",
+    min: 0,
+    required: true,
+    extra: "0 allows only today or this week.",
+    hiddenWhen: (values) => values.lateLimit !== "CUSTOM",
   },
   {
     name: "items",

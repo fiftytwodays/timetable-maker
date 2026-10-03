@@ -1,5 +1,15 @@
 import { useRef, useState } from "react";
-import { Button, Flex, Form, Input, Modal, Select, TimePicker } from "antd";
+import {
+  Button,
+  DatePicker,
+  Flex,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Select,
+  TimePicker,
+} from "antd";
 import dayjs from "dayjs";
 import {
   ArrowDownOutlined,
@@ -86,6 +96,29 @@ function FieldInput({ field, ...inputProps }) {
       />
     );
   }
+  if (field.type === "date") {
+    return (
+      <DatePicker
+        {...inputProps}
+        format="D MMM YYYY"
+        placeholder={field.placeholder}
+        disabled={field.disabled}
+        style={{ width: "100%" }}
+      />
+    );
+  }
+  if (field.type === "number") {
+    return (
+      <InputNumber
+        {...inputProps}
+        min={field.min}
+        max={field.max}
+        placeholder={field.placeholder}
+        disabled={field.disabled}
+        style={{ width: "100%" }}
+      />
+    );
+  }
   if (field.type === "time") {
     return (
       <TimePicker
@@ -118,6 +151,12 @@ function FieldInput({ field, ...inputProps }) {
     />
   );
 }
+
+// Date fields store a "YYYY-MM-DD" string; the picker works with dayjs.
+const dateValueProps = {
+  getValueProps: (value) => ({ value: value ? dayjs(value) : null }),
+  normalize: (value) => (value ? value.format("YYYY-MM-DD") : null),
+};
 
 // Time fields store a 24-hour "HH:mm" string; the picker works with dayjs.
 const timeValueProps = {
@@ -183,7 +222,9 @@ function EntityFormModal({
                 extra={field.extra}
                 rules={field.rules}
                 initialValue={field.initialValue}
+                dependencies={field.dependencies}
                 {...(field.type === "time" && timeValueProps)}
+                {...(field.type === "date" && dateValueProps)}
               >
                 <FieldInput field={field} />
               </Form.Item>

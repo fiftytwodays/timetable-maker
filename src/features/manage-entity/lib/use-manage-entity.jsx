@@ -31,8 +31,9 @@ const revalidateAll = () => mutate(() => true);
  * Adds create, edit and delete to an entity list. Returns the toolbar button,
  * an actions column for the table and the form modal to render.
  *
- * Field options: `required`, `unique`, `rules`, `type` ("select",
- * "textarea", "time" or "list"), `hiddenOnCreate`, `disabledOnEdit` and
+ * Field options: `required`, `unique`, `rules`, `dependencies`, `type`
+ * ("select", "textarea", "time", "date", "number" or "list"),
+ * `hiddenOnCreate`, `disabledOnEdit` and
  * `hiddenWhen(values)`, which hides (and skips submitting) the field.
  * `fields` can also be a function of the record being created or edited.
  * `createRecord(values, initialValues)`, `updateRecord(id, values, record)`

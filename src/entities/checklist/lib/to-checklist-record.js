@@ -12,6 +12,7 @@ export const toChecklistRecord = (item) => {
 
   return {
     ...toRecord(item),
+    lateLimit: item.lateLimit || "SCHOOL_DEFAULT",
     items,
     itemCount: items.length,
     assignments,

@@ -52,7 +52,7 @@ Sign in with that username and temporary password; you are asked to choose a new
 | Role | Can do |
 | --- | --- |
 | `ADMIN` | Everything: manage entities, associations, timetables, checklists and logins. |
-| `TEACHER` | View the class, students and teachers timetables. |
+| `TEACHER` | View the class, students and teachers timetables, and the school calendar. |
 
 Users sign in with their **username**, or with their **email** if they have one. An email address is optional: if one is set, Cognito also emails the invitation and the user can reset their own password with "Forgot your password?". Each email can belong to only one login.
 
@@ -75,7 +75,19 @@ Class–subject–teacher associations and class-timetable entries can also be a
 
 Each teacher can have a **coordinator**, set on the Teachers page: another teacher with a login, who reviews their checklists. A teacher cannot coordinate themselves, and teachers without a coordinator have their checklists reviewed automatically. Deleting a coordinator leaves the teachers they coordinated without one.
 
-On the **Checklists** page, admins create checklists: a title, a description, a frequency (daily, weekly or one-time), an ordered list of activities, and the teachers who must complete it. Deleting a teacher removes their checklist assignments.
+On the **Checklists** page, admins create checklists: a title, a description, a frequency (daily, weekly or one-time), how far back teachers can fill it in, an ordered list of activities, and the teachers who must complete it. Deleting a teacher removes their checklist assignments.
+
+How far back teachers can fill in checklists is set on the **School** page: a number of days, `0` for only today or this week, or empty for no limit. A checklist can use this school default, its own number of days, or no limit.
+
+### School calendar
+
+The **Calendar** page defines the school days, which decide when daily checklists are due. Admins set:
+
+- **Working days**: the days of the week the school normally works (Monday to Saturday by default).
+- **Holidays**: a date or a range of dates when the school is closed.
+- **Extra working days**: normally-off days when the school works, for example a compensatory Saturday.
+
+A holiday wins where it overlaps an extra working day. Admins click a day in the month view to add or edit an entry; teachers can view the calendar. The calendar does not change the timetables.
 
 ## Deploying
 

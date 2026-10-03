@@ -7,6 +7,7 @@ import { useState } from "react";
 import SchoolDetailsForm from "./SchoolDetailsForm";
 import Image from "next/image";
 import { getImageUrl } from "../lib/get-image-url";
+import { describeLateDays } from "../lib/describe-late-days";
 
 function SchoolDetails() {
   const [isEditing, setIsEditing] = useState(false);
@@ -66,6 +67,11 @@ function generateDescriptionItems(data) {
       key: "6",
       label: "Contact",
       children: data?.contact,
+    },
+    {
+      key: "7",
+      label: "Fill in past checklists",
+      children: describeLateDays(data?.checklistLateDays),
     },
   ];
 

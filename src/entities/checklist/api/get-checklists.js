@@ -7,6 +7,8 @@ const selectionSet = [
   "title",
   "description",
   "frequency",
+  "lateLimit",
+  "lateDays",
   "createdAt",
   "updatedAt",
   "items.id",
