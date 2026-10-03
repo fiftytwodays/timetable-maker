@@ -73,6 +73,8 @@ Each period is a **lesson** or a **break** with a start and end time. Periods ca
 
 Class–subject–teacher associations and class-timetable entries can also be added, edited and deleted from their pages. Saving is refused if it would double-book a class or a teacher in the same day and period, and a class, subject and teacher can only be associated once.
 
+Each teacher can have a **coordinator**, set on the Teachers page: another teacher with a login, who reviews their checklists. A teacher cannot coordinate themselves, and teachers without a coordinator have their checklists reviewed automatically. Deleting a coordinator leaves the teachers they coordinated without one.
+
 On the **Checklists** page, admins create checklists: a title, a description, a frequency (daily, weekly or one-time), an ordered list of activities, and the teachers who must complete it. Deleting a teacher removes their checklist assignments.
 
 ## Deploying
