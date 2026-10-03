@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 import { describeLateDays } from "@/entities/school/lib/describe-late-days";
 
 export const FREQUENCY_LABELS = {
@@ -28,6 +30,13 @@ export const columns = [
     dataIndex: "frequency",
     width: 120,
     render: (frequency) => FREQUENCY_LABELS[frequency] || "---",
+  },
+  {
+    title: "Starts",
+    dataIndex: "startDate",
+    width: 130,
+    render: (startDate) =>
+      startDate ? dayjs(startDate).format("D MMM YYYY") : "---",
   },
   {
     title: "Activities",

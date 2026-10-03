@@ -1,4 +1,5 @@
 import { toRecord } from "@/shared/lib/amplify";
+import { getStartDate } from "@/shared/lib/checklist-rules";
 
 /**
  * Maps a Checklist to the shape the list and form use: items in order as
@@ -13,6 +14,8 @@ export const toChecklistRecord = (item) => {
   return {
     ...toRecord(item),
     lateLimit: item.lateLimit || "SCHOOL_DEFAULT",
+    // Checklists created before start dates existed start on that day.
+    startDate: getStartDate(item),
     items,
     itemCount: items.length,
     assignments,

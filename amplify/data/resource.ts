@@ -98,6 +98,9 @@ const schema = a
       title: a.string().required(),
       description: a.string(),
       frequency: a.enum(["DAILY", "WEEKLY", "ONCE"]),
+      // Due from this date (a weekly checklist from the week containing it).
+      // Empty for checklists created before start dates: their creation day.
+      startDate: a.date(),
       // How far back teachers can fill it in: the school setting (default),
       // `lateDays` days, or no limit.
       lateLimit: a.enum(["SCHOOL_DEFAULT", "CUSTOM", "NO_LIMIT"]),

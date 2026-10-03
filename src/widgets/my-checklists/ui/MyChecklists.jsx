@@ -7,6 +7,7 @@ import {
   Flex,
   Skeleton,
   Space,
+  Switch,
   Table,
   Tabs,
   Typography,
@@ -31,11 +32,25 @@ import {
   getFillInState,
   getLateDaysLimit,
   getPeriod,
-  isPeriodDue,
+  isChecklistDue,
   submissionId,
   todayInSchool,
 } from "@/shared/lib/checklist-rules";
 import { getDayInfo, getWorkingWeekdays } from "@/shared/lib/school-calendar";
+
+// Nothing was saved and it can no longer be filled in.
+const isClosed = (row) => !row.submission && !row.fillIn.canFillIn;
+
+const STATUS_ORDER = {
+  RETURNED: 0,
+  IN_PROGRESS: 1,
+  NOT_STARTED: 2,
+  SUBMITTED: 3,
+  REVIEWED: 4,
+};
+
+const rowOrder = (row) =>
+  isClosed(row) ? 5 : STATUS_ORDER[row.submission?.status || "NOT_STARTED"];
 
 const FILL_IN_REFUSALS = {
   TOO_LATE: "Too late to fill in",
@@ -48,6 +63,7 @@ function MyChecklists() {
   const [date, setDate] = useState(today);
   const [opened, setOpened] = useState(null);
   const [openCount, setOpenCount] = useState(0);
+  const [showClosed, setShowClosed] = useState(false);
 
   const { data: checklists } = useSWR(["/api/checklists"], getAllChecklists);
   const { data: schools } = useSWR(["/api/school"], getSchoolInfo);
@@ -106,13 +122,22 @@ function MyChecklists() {
     return { checklist, period, submission, fillIn, date: day };
   };
 
-  const dueRows = isLoading
+  // Things to do first, then submitted ones, then those that can no longer
+  // be filled in (hidden unless asked for).
+  const allDueRows = isLoading
     ? []
     : myChecklists
+        .filter((checklist) => isChecklistDue(checklist, date, calendar))
         .map((checklist) => describe(checklist, date))
-        .filter(({ checklist, period }) =>
-          isPeriodDue(checklist.frequency, period, calendar)
+        .sort(
+          (a, b) =>
+            rowOrder(a) - rowOrder(b) ||
+            a.checklist.title.localeCompare(b.checklist.title)
         );
+  const closedCount = allDueRows.filter(isClosed).length;
+  const dueRows = showClosed
+    ? allDueRows
+    : allDueRows.filter((row) => !isClosed(row));
 
   const open = (row) => {
     setOpened(row);
@@ -239,9 +264,12 @@ function MyChecklists() {
   ];
 
   const { holiday } = getDayInfo(date, calendar);
-  const emptyText = holiday
-    ? `Nothing due: ${holiday.name}`
-    : "Nothing due for this day";
+  let emptyText = "Nothing due for this day";
+  if (holiday) {
+    emptyText = `Nothing due: ${holiday.name}`;
+  } else if (closedCount > 0) {
+    emptyText = "Nothing left to fill in for this day";
+  }
 
   return (
     <>
@@ -273,6 +301,20 @@ function MyChecklists() {
                     <Button onClick={() => setDate(today)}>Today</Button>
                   )}
                 </Space>
+                {closedCount > 0 && (
+                  <Space>
+                    <Switch
+                      size="small"
+                      checked={showClosed}
+                      onChange={setShowClosed}
+                    />
+                    <Typography.Text type="secondary">
+                      Show {closedCount} checklist
+                      {closedCount === 1 ? "" : "s"} that can no longer be
+                      filled in
+                    </Typography.Text>
+                  </Space>
+                )}
                 <Table
                   loading={isLoading}
                   rowKey={(row) => row.checklist.id}

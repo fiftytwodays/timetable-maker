@@ -59,6 +59,25 @@ export const isPeriodDue = (frequency, period, calendar) => {
   return true;
 };
 
+/** The first day a checklist is due: its start date, or its creation day. */
+export const getStartDate = (checklist) =>
+  checklist.startDate ||
+  (checklist.createdAt ? todayInSchool(new Date(checklist.createdAt)) : null);
+
+/**
+ * Whether a checklist is due for the day or week containing `date`: from
+ * its start date (a weekly one from the week containing it), on school days
+ * or in weeks with one.
+ */
+export const isChecklistDue = (checklist, date, calendar) => {
+  const { frequency } = checklist;
+  const period = getPeriod(frequency, date);
+  const startDate = getStartDate(checklist);
+  const isBeforeStart =
+    startDate && (frequency === "ONCE" ? date : period.end) < startDate;
+  return !isBeforeStart && isPeriodDue(frequency, period, calendar);
+};
+
 /** Days back a checklist can be filled in; null means no limit. */
 export const getLateDaysLimit = (checklist, school) => {
   if (checklist.lateLimit === "NO_LIMIT") {

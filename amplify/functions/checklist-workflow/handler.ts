@@ -8,10 +8,11 @@ import type { Schema } from "../../data/resource";
 import {
   EDITABLE_STATUSES,
   getFillInState,
+  getStartDate,
   getLateDaysLimit,
   getMissingComments,
   getPeriod,
-  isPeriodDue,
+  isChecklistDue,
   submissionId,
   todayInSchool,
 } from "../../../src/shared/lib/checklist-rules.js";
@@ -120,8 +121,12 @@ const saveChecklist = async (
   { checklistId, date, items: input, submit }: SaveArguments,
   identity: AppSyncIdentityCognito
 ) => {
+  const today = todayInSchool();
   if (!DATE_PATTERN.test(date)) {
     throw new Error("The date is not valid.");
+  }
+  if (date > today) {
+    throw new Error("You cannot fill in a checklist for a future date.");
   }
 
   const [teacher] = await listAll((options) =>
@@ -144,6 +149,8 @@ const saveChecklist = async (
           "frequency",
           "lateLimit",
           "lateDays",
+          "startDate",
+          "createdAt",
           "items.id",
           "items.title",
           "items.sortOrder",
@@ -177,7 +184,11 @@ const saveChecklist = async (
 
   const frequency = checklist.frequency ?? "DAILY";
   const period = getPeriod(frequency, date);
-  if (!isPeriodDue(frequency, period, calendar)) {
+  const startDate = getStartDate(checklist);
+  if (startDate && (frequency === "ONCE" ? date : period.end) < startDate) {
+    throw new Error(`This checklist starts on ${startDate}.`);
+  }
+  if (!isChecklistDue({ ...checklist, frequency }, date, calendar)) {
     throw new Error(
       frequency === "WEEKLY"
         ? "That week has no school days."
@@ -188,7 +199,7 @@ const saveChecklist = async (
   const fillIn = getFillInState({
     frequency,
     period,
-    today: todayInSchool(),
+    today,
     lateDays: getLateDaysLimit(checklist, school),
   });
   if (fillIn.reason === "NOT_STARTED") {
