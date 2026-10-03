@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
-import { Button, Layout, Menu, Space, Typography } from "antd";
+import { Button, Dropdown, Layout, Menu, Typography } from "antd";
+import { DownOutlined, LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -13,27 +14,17 @@ const link = (key, href, label) => ({
   label: <Link href={href}>{label}</Link>,
 });
 
+// Grouped by what people do. Pages a user cannot open are left out, so
+// teachers see Checklists, Timetables and Calendar.
 const items = [
   {
-    key: "entities",
-    label: "Entities",
+    key: "checklists-menu",
+    label: "Checklists",
     children: [
-      link("teachers", "/teachers", "Teachers"),
-      link("subjects", "/subjects", "Subjects"),
-      link("classes", "/classes", "Classes"),
-      link("periods", "/periods", "Periods"),
-      link("school", "/school", "School"),
+      link("my-checklists", "/my-checklists", "My checklists"),
+      link("checklists", "/checklists", "Manage checklists"),
     ],
   },
-  {
-    key: "associations",
-    label: "Associations",
-    children: [
-      link("csta", "/csta", "Class-Subject-Teacher association"),
-      link("cta", "/cta", "Class-Timetable association"),
-    ],
-  },
-  link("create-timetable", "/create-timetable", "Create timetable"),
   {
     key: "timetables",
     label: "Timetables",
@@ -41,18 +32,34 @@ const items = [
       link("class-timetable", "/class-timetable", "Class timetable"),
       link("students-timetable", "/students-timetable", "Students timetable"),
       link("teachers-timetable", "/teachers-timetable", "Teachers timetable"),
+      { type: "divider", adminOnly: true },
+      link("create-timetable", "/create-timetable", "Create timetable"),
+      link("cta", "/cta", "Timetable entries"),
     ],
   },
-  link("my-checklists", "/my-checklists", "My checklists"),
   link("calendar", "/calendar", "Calendar"),
-  link("checklists", "/checklists", "Checklists"),
-  link("users", "/users", "Users"),
+  {
+    key: "setup",
+    label: "Setup",
+    children: [
+      link("school", "/school", "School"),
+      link("teachers", "/teachers", "Teachers"),
+      link("subjects", "/subjects", "Subjects"),
+      link("classes", "/classes", "Classes"),
+      link("periods", "/periods", "Periods"),
+      link("csta", "/csta", "Teaching assignments"),
+      link("users", "/users", "Users"),
+    ],
+  },
 ];
 
 // Keeps only the pages the user can open, dropping groups left empty.
 const filterItems = (menuItems, currentUser) =>
   menuItems
-    .map(({ href, children, ...item }) => {
+    .map(({ href, children, adminOnly, ...item }) => {
+      if (item.type === "divider") {
+        return !adminOnly || currentUser.isAdmin ? item : null;
+      }
       if (children) {
         const visible = filterItems(children, currentUser);
         return visible.length > 0 ? { ...item, children: visible } : null;
@@ -60,6 +67,50 @@ const filterItems = (menuItems, currentUser) =>
       return canAccess(href, currentUser) ? item : null;
     })
     .filter(Boolean);
+
+function UserMenu({ currentUser, onSignOut }) {
+  const displayName = currentUser.displayName || "Account";
+  const role = currentUser.isAdmin ? "Admin" : "Teacher";
+  const details = [currentUser.username, currentUser.email]
+    .filter((value) => value && value !== displayName)
+    .join(" · ");
+
+  return (
+    <Dropdown
+      trigger={["click"]}
+      menu={{
+        items: [
+          {
+            key: "user",
+            disabled: true,
+            label: (
+              <>
+                <Typography.Text strong>{displayName}</Typography.Text>
+                <br />
+                <Typography.Text type="secondary">
+                  {details ? `${role} · ${details}` : role}
+                </Typography.Text>
+              </>
+            ),
+          },
+          { type: "divider" },
+          {
+            key: "sign-out",
+            icon: <LogoutOutlined />,
+            label: "Sign out",
+            onClick: onSignOut,
+          },
+        ],
+      }}
+    >
+      <Button type="text" style={{ color: "white" }}>
+        <UserOutlined />
+        {displayName}
+        <DownOutlined />
+      </Button>
+    </Dropdown>
+  );
+}
 
 const AppLayout = ({ children, onSignOut, currentUser = {} }) => {
   const router = useRouter();
@@ -87,14 +138,9 @@ const AppLayout = ({ children, onSignOut, currentUser = {} }) => {
             minWidth: 0,
           }}
         />
-        <Space>
-          {currentUser.email && (
-            <Typography.Text style={{ color: "white" }}>
-              {currentUser.email}
-            </Typography.Text>
-          )}
-          {onSignOut && <Button onClick={onSignOut}>Sign out</Button>}
-        </Space>
+        {onSignOut && (
+          <UserMenu currentUser={currentUser} onSignOut={onSignOut} />
+        )}
       </Header>
       <Content>{children}</Content>
       <Footer
