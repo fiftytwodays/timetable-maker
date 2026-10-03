@@ -1,3 +1,4 @@
+import { todayInSchool } from "@/shared/lib/checklist-rules";
 import { FREQUENCY_LABELS, LATE_LIMIT_LABELS } from "./columns";
 
 export const getFormFields = ({ teachers = [] }) => [
@@ -24,6 +25,15 @@ export const getFormFields = ({ teachers = [] }) => [
       value,
       label,
     })),
+  },
+  {
+    name: "startDate",
+    label: "Start date",
+    type: "date",
+    required: true,
+    initialValue: todayInSchool(),
+    extra:
+      "The checklist is due from this date; a weekly one from the week containing it.",
   },
   {
     name: "lateLimit",

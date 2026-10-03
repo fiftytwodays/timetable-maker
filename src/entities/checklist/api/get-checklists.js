@@ -9,6 +9,7 @@ const selectionSet = [
   "frequency",
   "lateLimit",
   "lateDays",
+  "startDate",
   "createdAt",
   "updatedAt",
   "items.id",

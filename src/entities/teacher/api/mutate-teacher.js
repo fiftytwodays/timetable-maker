@@ -2,6 +2,7 @@ import {
   assertNotReferenced,
   client,
   createCrudApi,
+  deleteWhere,
   listAll,
   unwrap,
 } from "@/shared/lib/amplify";
@@ -46,7 +47,11 @@ const removeAsCoordinator = async (id) => {
   );
 };
 
-export const deleteTeacher = async (id) => {
+/**
+ * `deleteSubmissions` also deletes the teacher's checklist submissions;
+ * otherwise they are kept as history.
+ */
+export const deleteTeacher = async (id, { deleteSubmissions = false } = {}) => {
   await assertNotReferenced(
     "Teacher",
     id,
@@ -55,5 +60,8 @@ export const deleteTeacher = async (id) => {
   );
   await removeChecklistAssignments(id);
   await removeAsCoordinator(id);
+  if (deleteSubmissions) {
+    await deleteWhere("ChecklistSubmission", { teacherId: { eq: id } });
+  }
   return remove(id);
 };

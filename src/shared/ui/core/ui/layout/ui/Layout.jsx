@@ -43,6 +43,7 @@ const items = [
       link("teachers-timetable", "/teachers-timetable", "Teachers timetable"),
     ],
   },
+  link("my-checklists", "/my-checklists", "My checklists"),
   link("calendar", "/calendar", "Calendar"),
   link("checklists", "/checklists", "Checklists"),
   link("users", "/users", "Users"),

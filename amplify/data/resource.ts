@@ -1,10 +1,12 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
+import { checklistWorkflow } from "../functions/checklist-workflow/resource";
 import { manageUsers } from "../functions/manage-users/resource";
 
 /**
  * SchoolDay data model. Admins can change everything; teachers can
- * read. The user management operations are admin only.
+ * read. The user management operations are admin only. Checklist
+ * submissions are only written by the checklist-workflow function.
  */
 const schema = a
   .schema({
@@ -96,6 +98,9 @@ const schema = a
       title: a.string().required(),
       description: a.string(),
       frequency: a.enum(["DAILY", "WEEKLY", "ONCE"]),
+      // Due from this date (a weekly checklist from the week containing it).
+      // Empty for checklists created before start dates: their creation day.
+      startDate: a.date(),
       // How far back teachers can fill it in: the school setting (default),
       // `lateDays` days, or no limit.
       lateLimit: a.enum(["SCHOOL_DEFAULT", "CUSTOM", "NO_LIMIT"]),
@@ -119,6 +124,63 @@ const schema = a
       teacherId: a.id().required(),
       teacher: a.belongsTo("Teacher", "teacherId"),
     }),
+
+    // A teacher's completion of a checklist for one day, one week, or once.
+    // Written only by the checklist-workflow function, which enforces the
+    // rules; names and activities are copied in, so the history stays
+    // readable after the teacher or checklist is deleted. The id is
+    // "<checklistId>_<teacherId>_<periodKey>".
+    ChecklistSubmission: a
+      .model({
+        checklistId: a.id().required(),
+        teacherId: a.id().required(),
+        // The date, the week's Monday, or "ONCE".
+        periodKey: a.string().required(),
+        // The first day of the period; empty for one-time checklists.
+        periodStart: a.date(),
+        frequency: a.string(),
+        status: a.enum(["IN_PROGRESS", "SUBMITTED", "RETURNED", "REVIEWED"]),
+        // [{ itemId, title, done, comment }]
+        items: a.json(),
+        // [{ type, at, by, comment }]: submitted, sent back, reviewed...
+        events: a.json(),
+        checklistTitle: a.string(),
+        teacherName: a.string(),
+        // Cognito subs that may read the submission.
+        teacherUserId: a.string(),
+        coordinatorUserId: a.string(),
+        coordinatorId: a.id(),
+        coordinatorName: a.string(),
+        isLate: a.boolean(),
+        autoReviewed: a.boolean(),
+        submittedAt: a.datetime(),
+        reviewedAt: a.datetime(),
+        reviewedBy: a.string(),
+        reviewComment: a.string(),
+      })
+      .authorization((allow) => [
+        allow.group("ADMIN"),
+        allow.ownerDefinedIn("teacherUserId").identityClaim("sub").to(["read"]),
+        allow
+          .ownerDefinedIn("coordinatorUserId")
+          .identityClaim("sub")
+          .to(["read"]),
+      ]),
+
+    // Saves the signed-in teacher's checklist for the day or week containing
+    // `date`, and submits it when `submit` is set. Returns the submission.
+    saveChecklist: a
+      .mutation()
+      .arguments({
+        checklistId: a.id().required(),
+        date: a.date().required(),
+        // [{ itemId, done, comment }]
+        items: a.json().required(),
+        submit: a.boolean().required(),
+      })
+      .returns(a.json())
+      .authorization((allow) => [allow.groups(["ADMIN", "TEACHER"])])
+      .handler(a.handler.function(checklistWorkflow)),
 
     // A Cognito user; `id` is the username.
     User: a.customType({
@@ -183,6 +245,7 @@ const schema = a
   .authorization((allow) => [
     allow.group("ADMIN"),
     allow.group("TEACHER").to(["read"]),
+    allow.resource(checklistWorkflow),
   ]);
 
 export type Schema = ClientSchema<typeof schema>;

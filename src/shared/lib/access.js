@@ -6,6 +6,7 @@ const TEACHER_ROUTES = [
   "/students-timetable",
   "/teachers-timetable",
   "/calendar",
+  "/my-checklists",
 ];
 
 export const canAccess = (pathname, { isAdmin }) =>

@@ -5,12 +5,14 @@ import { auth } from "./auth/resource";
 import { data } from "./data/resource";
 import { storage } from "./storage/resource";
 import { manageUsers } from "./functions/manage-users/resource";
+import { checklistWorkflow } from "./functions/checklist-workflow/resource";
 
 const backend = defineBackend({
   auth,
   data,
   storage,
   manageUsers,
+  checklistWorkflow,
 });
 
 const { cfnUserPool } = backend.auth.resources.cfnResources;

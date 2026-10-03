@@ -1,4 +1,4 @@
-import { createCrudApi } from "@/shared/lib/amplify";
+import { createCrudApi, deleteWhere } from "@/shared/lib/amplify";
 
 const checklists = createCrudApi("Checklist");
 const checklistItems = createCrudApi("ChecklistItem");
@@ -82,7 +82,18 @@ export const updateChecklist = async (id, values, record) => {
   return checklist;
 };
 
-export const deleteChecklist = async (id, record) => {
+/**
+ * `deleteSubmissions` also deletes the checklist's submissions; otherwise
+ * they are kept as history.
+ */
+export const deleteChecklist = async (
+  id,
+  record,
+  { deleteSubmissions = false } = {}
+) => {
+  if (deleteSubmissions) {
+    await deleteWhere("ChecklistSubmission", { checklistId: { eq: id } });
+  }
   await Promise.all([
     ...(record?.items || []).map((item) => checklistItems.remove(item.id)),
     ...(record?.assignments || []).map((assignment) =>
