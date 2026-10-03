@@ -28,6 +28,9 @@ const schema = a
       // Login linked to this teacher: the Cognito user's sub and username.
       userId: a.string(),
       username: a.string(),
+      // The teacher who reviews this teacher's checklists; must have a login.
+      // Without one, their checklists are reviewed automatically.
+      coordinatorId: a.id(),
       associations: a.hasMany("ClassSubjectTeacherAssociation", "teacherId"),
       checklistAssignments: a.hasMany("ChecklistAssignment", "teacherId"),
     }),

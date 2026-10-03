@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Button, Dropdown, Modal, Space, Spin, message } from "antd";
+import { Alert, Button, Dropdown, Modal, Space, Spin, Tag, message } from "antd";
 import { DownOutlined, UserAddOutlined } from "@ant-design/icons";
 import useSWR, { mutate } from "swr";
 
@@ -10,7 +10,7 @@ import {
   updateTeacher,
   deleteTeacher,
 } from "@/entities/teacher/api/mutate-teacher";
-import { formFields } from "@/entities/teacher/config/form-fields";
+import { getFormFields } from "@/entities/teacher/config/form-fields";
 import { getAllUsers } from "@/entities/user/api/get-users";
 import {
   createUser,
@@ -52,12 +52,19 @@ function TeachersList() {
     getAllUsers
   );
 
+  const { data: allTeachers } = useSWR(["/api/teachers"], getAllTeachers);
+
   const loginFor = (teacher) =>
     teacher.userId ? users?.find((user) => user.sub === teacher.userId) : null;
+  const hasLogin = (teacher) => Boolean(loginFor(teacher));
+  const coordinatedBy = (teacher) =>
+    (allTeachers || []).filter(
+      (candidate) => candidate.coordinatorId === teacher.id
+    );
 
   const teachers = useManageEntity({
     entityName: "Teacher",
-    fields: formFields,
+    fields: getFormFields({ teachers: allTeachers, hasLogin }),
     getRecords: getAllTeachers,
     createRecord: createTeacher,
     updateRecord: async (id, values, teacher) => {
@@ -81,10 +88,15 @@ function TeachersList() {
         await deleteUser(login.id);
       }
     },
-    getDeleteDescription: (teacher) =>
-      teacher.username
+    getDeleteDescription: (teacher) => {
+      const question = teacher.username
         ? `Delete "${teacher.name}" and their login "${teacher.username}"?`
-        : `Delete "${teacher.name}"?`,
+        : `Delete "${teacher.name}"?`;
+      const coordinated = coordinatedBy(teacher).length;
+      return coordinated > 0
+        ? `${question} ${coordinated} teacher(s) they coordinate will have no coordinator.`
+        : question;
+    },
   });
 
   const logins = useManageEntity({
@@ -102,6 +114,30 @@ function TeachersList() {
     deleteRecord: deleteUser,
     getRecordLabel: (user) => user.username,
   });
+
+  const coordinatorColumn = {
+    title: "Coordinator",
+    key: "coordinator",
+    width: 220,
+    render: (_, teacher) => {
+      if (!teacher.coordinatorId) {
+        return "---";
+      }
+      const coordinator = allTeachers?.find(
+        (candidate) => candidate.id === teacher.coordinatorId
+      );
+      if (!coordinator) {
+        return "---";
+      }
+      // Checked once logins load: without one, reviews are automatic.
+      return (
+        <Space size="small">
+          <span>{coordinator.name}</span>
+          {users && !hasLogin(coordinator) && <Tag color="warning">No login</Tag>}
+        </Space>
+      );
+    },
+  };
 
   const loginColumn = {
     title: "Login",
@@ -182,7 +218,7 @@ function TeachersList() {
         pageSize={pageSize}
         setPageSize={setPageSize}
         isLoading={false}
-        extraColumns={[loginColumn, teachers.actionsColumn]}
+        extraColumns={[coordinatorColumn, loginColumn, teachers.actionsColumn]}
         toolbarExtensions={[teachers.addButton]}
       />
       {teachers.formModal}

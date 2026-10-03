@@ -34,6 +34,7 @@ const revalidateAll = () => mutate(() => true);
  * Field options: `required`, `unique`, `rules`, `type` ("select",
  * "textarea", "time" or "list"), `hiddenOnCreate`, `disabledOnEdit` and
  * `hiddenWhen(values)`, which hides (and skips submitting) the field.
+ * `fields` can also be a function of the record being created or edited.
  * `createRecord(values, initialValues)`, `updateRecord(id, values, record)`
  * and `deleteRecord(id, record)` also receive the record being changed.
  * `extraActions(record)` adds row buttons and `getDeleteDescription(record)`
@@ -63,7 +64,9 @@ export default function useManageEntity({
     setFormKey((key) => key + 1);
   };
 
-  const visibleFields = fields.filter(
+  const resolvedFields =
+    typeof fields === "function" ? fields(editingRecord || {}) : fields;
+  const visibleFields = resolvedFields.filter(
     (field) => isEditing || !field.hiddenOnCreate
   );
 
