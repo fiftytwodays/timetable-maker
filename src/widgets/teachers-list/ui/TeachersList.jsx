@@ -3,6 +3,11 @@ import { Alert, Button, Dropdown, Modal, Space, Spin, Tag, message } from "antd"
 import { DownOutlined, UserAddOutlined } from "@ant-design/icons";
 import useSWR, { mutate } from "swr";
 
+import {
+  DeleteDescription,
+  useDeleteHistoryChoice,
+} from "@/entities/checklist-submission";
+import { getAllSubmissions } from "@/entities/checklist-submission/api/get-submissions";
 import { TeachersList as _TeachersList } from "@/entities/teacher";
 import { getAllTeachers } from "@/entities/teacher/api/get-teachers";
 import {
@@ -53,6 +58,11 @@ function TeachersList() {
   );
 
   const { data: allTeachers } = useSWR(["/api/teachers"], getAllTeachers);
+  const { data: submissions } = useSWR(
+    ["/api/checklist-submissions"],
+    getAllSubmissions
+  );
+  const deleteHistory = useDeleteHistoryChoice();
 
   const loginFor = (teacher) =>
     teacher.userId ? users?.find((user) => user.sub === teacher.userId) : null;
@@ -83,7 +93,9 @@ function TeachersList() {
       if (login && login.sub === currentUser.userId) {
         throw new Error("This is your own login. Ask another admin to do it.");
       }
-      await deleteTeacher(id);
+      await deleteTeacher(id, {
+        deleteSubmissions: deleteHistory.shouldDelete(id),
+      });
       if (login) {
         await deleteUser(login.id);
       }
@@ -93,9 +105,22 @@ function TeachersList() {
         ? `Delete "${teacher.name}" and their login "${teacher.username}"?`
         : `Delete "${teacher.name}"?`;
       const coordinated = coordinatedBy(teacher).length;
-      return coordinated > 0
-        ? `${question} ${coordinated} teacher(s) they coordinate will have no coordinator.`
-        : question;
+      return (
+        <DeleteDescription
+          question={
+            coordinated > 0
+              ? `${question} ${coordinated} teacher(s) they coordinate will have no coordinator.`
+              : question
+          }
+          count={
+            submissions?.filter(
+              (submission) => submission.teacherId === teacher.id
+            ).length
+          }
+          checked={deleteHistory.shouldDelete(teacher.id)}
+          onChange={(value) => deleteHistory.setShouldDelete(teacher.id, value)}
+        />
+      );
     },
   });
 

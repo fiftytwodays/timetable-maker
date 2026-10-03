@@ -64,6 +64,18 @@ export const createCrudApi = (modelName) => {
 };
 
 /**
+ * Deletes every record of a model that matches `filter`.
+ */
+export const deleteWhere = async (modelName, filter) => {
+  const model = client.models[modelName];
+  const records = await listAll(model, { filter, selectionSet: ["id"] });
+  await Promise.all(
+    records.map(async ({ id }) => unwrap(await model.delete({ id })))
+  );
+  return records.length;
+};
+
+/**
  * Throws if the record still has related records through `relation`
  * (a hasMany field), so deleting it would leave dangling references.
  */

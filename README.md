@@ -52,7 +52,7 @@ Sign in with that username and temporary password; you are asked to choose a new
 | Role | Can do |
 | --- | --- |
 | `ADMIN` | Everything: manage entities, associations, timetables, checklists and logins. |
-| `TEACHER` | View the class, students and teachers timetables, and the school calendar. |
+| `TEACHER` | View the class, students and teachers timetables and the school calendar, and fill in their checklists. |
 
 Users sign in with their **username**, or with their **email** if they have one. An email address is optional: if one is set, Cognito also emails the invitation and the user can reset their own password with "Forgot your password?". Each email can belong to only one login.
 
@@ -78,6 +78,14 @@ Each teacher can have a **coordinator**, set on the Teachers page: another teach
 On the **Checklists** page, admins create checklists: a title, a description, a frequency (daily, weekly or one-time), how far back teachers can fill it in, an ordered list of activities, and the teachers who must complete it. Deleting a teacher removes their checklist assignments.
 
 How far back teachers can fill in checklists is set on the **School** page: a number of days, `0` for only today or this week, or empty for no limit. A checklist can use this school default, its own number of days, or no limit.
+
+### Filling in checklists
+
+Teachers fill in their checklists on the **My checklists** page (admins linked to a teacher can too). It lists the checklists due on the chosen day, today by default: daily checklists on school days, weekly checklists (Monday to Sunday) in weeks with a school day, and one-time checklists always. For each one the teacher ticks the activities they completed and can add a comment to each; an activity that is not ticked needs a comment before the checklist can be submitted. Progress can be saved and finished later.
+
+When a checklist is submitted, it waits for the teacher's coordinator to review it. A teacher without a coordinator (or whose coordinator has no login) is reviewed automatically. Filling in a day or week after it ended is allowed within the configured limit and marks the submission **Late**. The **History** tab lists past submissions with their status, reviewer and timeline.
+
+Submissions are only written by the `checklist-workflow` function ([amplify/functions/checklist-workflow](amplify/functions/checklist-workflow)), which checks the rules shared with the app ([src/shared/lib/checklist-rules.js](src/shared/lib/checklist-rules.js)). A submission can be read by admins, the teacher, and their coordinator. The checklist's activities, title and the teacher's name are copied into each submission, so it stays readable after the checklist changes. When deleting a teacher or a checklist that has submissions, admins choose whether to also delete them or keep them as history.
 
 ### School calendar
 
