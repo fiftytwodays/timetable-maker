@@ -51,7 +51,7 @@ Sign in with that username and temporary password; you are asked to choose a new
 
 | Role | Can do |
 | --- | --- |
-| `ADMIN` | Everything: manage entities, associations, timetables, checklists and logins. |
+| `ADMIN` | Everything: the school setup, timetables, checklists and logins. |
 | `TEACHER` | View the class, students and teachers timetables and the school calendar, and fill in their checklists. |
 
 Users sign in with their **username**, or with their **email** if they have one. An email address is optional: if one is set, Cognito also emails the invitation and the user can reset their own password with "Forgot your password?". Each email can belong to only one login.
@@ -63,19 +63,30 @@ When an admin creates a login or resets a password, the app generates a **tempor
 
 Admins cannot delete, disable or demote their own account.
 
+## Navigation
+
+The menu is grouped by what people do; each user only sees the pages they can open:
+
+- **Checklists**: My checklists, and for admins Manage checklists.
+- **Timetables**: the class, students and teachers timetables, and for admins Create timetable and Timetable entries.
+- **Calendar**: the school calendar.
+- **Setup** (admins): School, Teachers, Subjects, Classes, Periods, Teaching assignments and Users.
+
+The signed-in user's name (or username) is shown on the right; click it to see the role and sign out. After signing in, admins start at the class timetable and teachers at My checklists.
+
 ## Managing data
 
 The first time someone signs in to a new deployment, the app creates the initial school record, the days (Monday to Saturday) and the periods: P1 (10:00–11:30), P2 (11:30–1:00), a Break (1:00–2:00), P3 (2:00–3:30) and P4 (3:30–5:00). Each table is only seeded while it is empty, so periods you later edit or delete are not recreated.
 
-Teachers, subjects, classes and periods can be added, edited and deleted from their pages in the app. A record that is still in use (for example, a teacher in a class–subject–teacher association, or a period in the timetable) cannot be deleted until those references are removed.
+Teachers, subjects, classes and periods can be added, edited and deleted from their pages in the app. A record that is still in use (for example, a teacher in a teaching assignment, or a period in the timetable) cannot be deleted until those references are removed.
 
-Each period is a **lesson** or a **break** with a start and end time. Periods cannot overlap. The timetables have one column per period, in time order: lessons show their name and time, and breaks span every day and show their name. Breaks cannot hold lessons, so they are left out of the Create timetable grid and the Class-Timetable association form, and a period already used in the timetable cannot be changed into a break.
+Each period is a **lesson** or a **break** with a start and end time. Periods cannot overlap. The timetables have one column per period, in time order: lessons show their name and time, and breaks span every day and show their name. Breaks cannot hold lessons, so they are left out of the Create timetable grid and the Timetable entries form, and a period already used in the timetable cannot be changed into a break.
 
-Class–subject–teacher associations and class-timetable entries can also be added, edited and deleted from their pages. Saving is refused if it would double-book a class or a teacher in the same day and period, and a class, subject and teacher can only be associated once.
+Teaching assignments (which teacher teaches which subject to which class) and timetable entries can also be added, edited and deleted from their pages. Saving is refused if it would double-book a class or a teacher in the same day and period, and a class, subject and teacher can only be associated once.
 
 Each teacher can have a **coordinator**, set on the Teachers page: another teacher with a login, who reviews their checklists. A teacher cannot coordinate themselves, and teachers without a coordinator have their checklists reviewed automatically. Deleting a coordinator leaves the teachers they coordinated without one.
 
-On the **Checklists** page, admins create checklists: a title, a description, a frequency (daily, weekly or one-time), a start date (today by default; a weekly checklist is due from the week containing it), how far back teachers can fill it in, an ordered list of activities, and the teachers who must complete it. Deleting a teacher removes their checklist assignments.
+On the **Manage checklists** page, admins create checklists: a title, a description, a frequency (daily, weekly or one-time), a start date (today by default; a weekly checklist is due from the week containing it), how far back teachers can fill it in, an ordered list of activities, and the teachers who must complete it. Deleting a teacher removes their checklist assignments.
 
 How far back teachers can fill in checklists is set on the **School** page: a number of days, `0` for only today or this week, or empty for no limit. A checklist can use this school default, its own number of days, or no limit.
 

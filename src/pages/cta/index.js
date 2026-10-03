@@ -6,14 +6,14 @@ function ClassSubjectTeacherAssociation() {
     <Page
       showPageHeader
       header={{
-        title: "Class-Timetable association",
+        title: "Timetable entries",
         breadcrumbs: [
           {
             title: "Home",
           },
 
           {
-            title: "Class-Timetable association",
+            title: "Timetable entries",
           },
         ],
       }}

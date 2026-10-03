@@ -6,9 +6,15 @@ const getCurrentUser = async () => {
   const payload = tokens?.idToken?.payload || {};
   const groups = payload["cognito:groups"] || [];
 
+  const username = payload["cognito:username"];
+
   return {
     userId: payload.sub,
     email: payload.email,
+    name: payload.name,
+    username,
+    // What the header shows: the name, else the username, else the email.
+    displayName: payload.name || username || payload.email,
     groups,
     isAdmin: groups.includes("ADMIN"),
     isTeacher: groups.includes("TEACHER"),
