@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { Button, Form, Input, Upload, theme, Space, message } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  Upload,
+  theme,
+  Space,
+  message,
+} from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { mutate } from "swr";
 
@@ -47,6 +56,7 @@ const SchoolDetailsForm = ({ data, setIsEditing }) => {
     contact: data?.contact,
     phone: data?.phone,
     logo: getImageUrl(data),
+    checklistLateDays: data?.checklistLateDays,
   };
 
   const onRemoveLogo = () => {
@@ -158,6 +168,14 @@ const SchoolDetailsForm = ({ data, setIsEditing }) => {
         ]}
       >
         <Input />
+      </Form.Item>
+
+      <Form.Item
+        label="Fill in past checklists"
+        name="checklistLateDays"
+        extra="How many days back teachers can fill in checklists. 0 allows only today or this week; leave empty for no limit. A checklist can override this."
+      >
+        <InputNumber min={0} addonAfter="days" placeholder="No limit" />
       </Form.Item>
 
       <Form.Item {...tailLayout}>

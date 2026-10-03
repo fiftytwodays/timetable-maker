@@ -56,8 +56,14 @@ const saveAssignments = async (
   ]);
 };
 
+// Days back only apply to a custom limit; a hidden field is not submitted.
+const withLateDays = ({ lateDays, ...fields }) => ({
+  ...fields,
+  lateDays: fields.lateLimit === "CUSTOM" ? lateDays : null,
+});
+
 export const createChecklist = async (values) => {
-  const { items, teacherIds, ...fields } = values;
+  const { items, teacherIds, ...fields } = withLateDays(values);
   assertHasItems(items);
 
   const checklist = await checklists.create(fields);
@@ -67,7 +73,7 @@ export const createChecklist = async (values) => {
 };
 
 export const updateChecklist = async (id, values, record) => {
-  const { items, teacherIds, ...fields } = values;
+  const { items, teacherIds, ...fields } = withLateDays(values);
   assertHasItems(items);
 
   const checklist = await checklists.update(id, fields);

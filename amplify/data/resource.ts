@@ -16,6 +16,21 @@ const schema = a
       email: a.string(),
       phone: a.string(),
       contact: a.string(),
+      // ISO weekdays the school works (1 = Monday ... 7 = Sunday). Empty
+      // means Monday to Saturday.
+      workingWeekdays: a.integer().array(),
+      // How many days back teachers can fill in checklists: 0 = only the
+      // current day or week, empty = no limit.
+      checklistLateDays: a.integer(),
+    }),
+
+    // A holiday, or an extra working day on a normally-off day, from
+    // startDate to endDate inclusive. Holidays win where both apply.
+    CalendarEntry: a.model({
+      name: a.string().required(),
+      type: a.enum(["HOLIDAY", "WORKING_DAY"]),
+      startDate: a.date().required(),
+      endDate: a.date().required(),
     }),
 
     SchoolClass: a.model({
@@ -81,6 +96,10 @@ const schema = a
       title: a.string().required(),
       description: a.string(),
       frequency: a.enum(["DAILY", "WEEKLY", "ONCE"]),
+      // How far back teachers can fill it in: the school setting (default),
+      // `lateDays` days, or no limit.
+      lateLimit: a.enum(["SCHOOL_DEFAULT", "CUSTOM", "NO_LIMIT"]),
+      lateDays: a.integer(),
       items: a.hasMany("ChecklistItem", "checklistId"),
       assignments: a.hasMany("ChecklistAssignment", "checklistId"),
     }),
